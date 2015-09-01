@@ -5,7 +5,6 @@ class PasswordResetsController < ApplicationController
   def create
     @user = User.find_by(email: params[:email].downcase)
     if set_password_reset_for(user: @user)
-      SystemMailer.password_reset(@user).deliver
       redirect_to login_path
     else
       render :new
@@ -27,7 +26,6 @@ class PasswordResetsController < ApplicationController
   private
   def authorize_by_token
     unless password_reset_valid?(password_reset_token: params[:token])
-      flash[:error] = "Sorry, your password-reset-token is too old"
       redirect_to new_password_resets_path
     end
   end
