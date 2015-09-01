@@ -1,5 +1,4 @@
 require_relative '../spec_helper'
-include ActiveSupport::Testing::TimeHelpers
 
 class PasswordResetController < ActionController::Base
   include JumpIn::PasswordReset
