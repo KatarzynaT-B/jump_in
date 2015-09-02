@@ -1,8 +1,13 @@
 require 'jump_in/authentication/strategy'
 require 'jump_in/authentication/by_password'
+require 'jump_in/authentication/session'
+require 'jump_in/authentication/cookies'
+
 
 module JumpIn
   module Authentication
+    include JumpIn::Authentication::Session
+    include JumpIn::Authentication::Cookies
 
     STRATEGIES = [ByPassword]
 
@@ -37,17 +42,6 @@ module JumpIn
       true
     end
 
-    def set_cookies(user:, expires:)
-      expires = (expires || 20.years).from_now
-      cookies.signed[:jump_in_class] = { value: user.class.to_s, expires: expires }
-      cookies.signed[:jump_in_id]    = { value: user.id, expires: expires }
-    end
-
-    def set_session(user:)
-      session[:jump_in_class] = user.class.to_s
-      session[:jump_in_id]    = user.id
-    end
-
 # LOGGING OUT
     def jump_out
       if session[:jump_in_id] && session[:jump_in_class]
@@ -56,16 +50,6 @@ module JumpIn
         delete_cookies
       end
       true
-    end
-
-    def delete_cookies
-      cookies.delete :jump_in_class
-      cookies.delete :jump_in_id
-    end
-
-    def delete_session
-      session.delete :jump_in_class
-      session.delete :jump_in_id
     end
 
 # HELPER METHODS
