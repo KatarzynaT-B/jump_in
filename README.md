@@ -10,10 +10,13 @@ JumpIn provides a set of methods that make building login & logout functionality
 ```
 gem 'jump_in'
 ```
-Don't forget to run:
+Don't forget to run: `$ bundle install`.
+
+After you install JumpIn, you need to run the generator:
 ```
-bundle install
+$ rails generate jump_in:install
 ```
+
 In order to use JumpIn you need to include modules of your choice in `application_controller.rb` or in a controller responsible for a particular functionality. For example in case of logging in with password and using password reset functionality you'll need:
 ```
 class ApplicationController < ActionController::Base
