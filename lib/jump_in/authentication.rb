@@ -1,15 +1,13 @@
-require 'jump_in/authentication/strategy'
-require 'jump_in/authentication/by_password'
+require 'jump_in/strategies'
 require 'jump_in/authentication/session'
 require 'jump_in/authentication/cookies'
-
 
 module JumpIn
   module Authentication
     include JumpIn::Authentication::Session
     include JumpIn::Authentication::Cookies
 
-    STRATEGIES = [ByPassword]
+    include JumpIn::Strategies
 
     def self.included(base)
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
@@ -70,11 +68,11 @@ module JumpIn
       (cookies.signed[:jump_in_id] && cookies.signed[:jump_in_class])
     end
 
-    def detected_strategy(user: user, params: params)
-      if strategy = STRATEGIES.detect { |strategy| strategy.detected?(params) }
+    def detected_strategy(user:, params:)
+      if strategy = JumpIn::Strategies::Base::STRATEGIES.detect { |strategy| strategy.detected?(params) }
         strategy.new(user: user, params: params)
       else
-        false
+        raise JumpIn::AuthenticationStrategyError
       end
     end
   end

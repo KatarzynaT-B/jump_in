@@ -1,6 +1,8 @@
+require 'jump_in/strategies'
+
 module JumpIn
-  module Authentication
-    class ByPassword < Strategy
+  module Strategies
+    class ByPassword < Base
       def self.detected?(params)
         params.include? :password
       end

@@ -52,11 +52,7 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
-    capybara-webkit (1.6.0)
-      capybara (>= 2.3.0, < 2.5.0)
-      json
     columnize (0.9.0)
-    database_cleaner (1.4.1)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     factory_girl (4.5.0)
@@ -131,7 +127,6 @@ GEM
     sqlite3 (1.3.10)
     thor (0.19.1)
     thread_safe (0.3.5)
-    timecop (0.8.0)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     xpath (2.0.0)
@@ -144,12 +139,9 @@ DEPENDENCIES
   bcrypt
   byebug
   capybara
-  capybara-webkit
-  database_cleaner
   factory_girl_rails
   jump_in!
   rails (~> 4.2.3)
   rake
   rspec-rails
   sqlite3
-  timecop

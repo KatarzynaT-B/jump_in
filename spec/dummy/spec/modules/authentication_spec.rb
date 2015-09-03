@@ -16,8 +16,13 @@ describe AuthenticationController, type: :controller do
     it "calls detect_strategy with proper params" do
       allow_to_receive_logged_in_and_return(false)
       expect(subject).to receive(:detected_strategy).with(user: user, params: { password: user.password }).
-        exactly(1).times.and_return(JumpIn::Authentication::ByPassword.new(user: user, params: { password: user.password }))
+        exactly(1).times.and_return(JumpIn::Strategies::ByPassword.new(user: user, params: { password: user.password }))
       subject.jump_in(user: user, password: user.password)
+    end
+
+    it "raises an error when no strategy detected" do
+      allow_to_receive_logged_in_and_return(false)
+      expect { subject.jump_in(user: user) }.to raise_error(JumpIn::AuthenticationStrategyError, "No authentication strategy detected.")
     end
 
     it "returns false if user not logged_in and wrong login data provided" do
