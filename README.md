@@ -1,6 +1,6 @@
 # JumpIn
 
-JumpIn provides a set of methods that make building login & logout functionality really simple, with only few steps. It takes care of setting cookies or session and has it's own tokenizer. Moreover, it allows to choose authentication strategy which fits your application the best.
+JumpIn provides a set of methods that make building login & logout functionality really simple, with only few steps. It takes care of setting cookies or session and has it's own tokenator. Moreover, it allows to choose authentication strategy which fits your application the best.
 
 ## Links:
 - [Source Code](https://github.com/KatarzynaT-B/jump_in)
@@ -63,7 +63,7 @@ logs out user (it clears session or cookies depending on the previous choice of 
 * `logged_in?` - returns `true` if any object is logged in (by means of the above mentioned login method). Otherwise it returns `false`,
 
 * `authenticate_by_strategy(user:, params:)` - returns result of strategy-authentication, returns `false` if strategy is not detected. All params needed for authentication need to be passed as hash, e.g. `authenticate_by_strategy(user: @student, params: { password: 'password'} )`,
-* `set_cookies(user:, expires:)` - sets `cookies.signed`. Default expiration time is set to 20 years as in `cookies.permanent`. You can pass your custom expiration time,
+* `set_cookies(user:, expires: nil)` - sets `cookies.signed`. Default expiration time is set to 20 years as in `cookies.permanent`. You can pass your custom expiration time,
 * `set_session(user:)` - sets session,
 * `delete_cookies` - clears cookies set by `set_cookies`,
 * `delete_session` - clears session set by `set_session`.
