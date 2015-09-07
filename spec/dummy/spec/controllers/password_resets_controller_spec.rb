@@ -24,11 +24,11 @@
 
 #   context "PATCH update" do
 #     before(:each) {
-#       user.update_attributes(password_reset_token: JumpIn::Tokenizer.generate_token)
+#       user.update_attributes(password_reset_token: JumpIn::Tokenator.generate_token)
 #     }
 
 #     it "before_filter redirects for token too old" do
-#       user.update_attribute(:password_reset_token, Base64.encode64("#{SecureRandom.hex(10)}.#{5.days.ago}"))
+#       user.update_attribute(:password_reset_token, Base64.urlsafe_encode64("#{SecureRandom.hex(10)}.#{5.days.ago}"))
 #       user.reload
 #       patch :update, params.merge( { use_route: :password_resets} )
 #       expect(response).to redirect_to(new_password_resets_path)

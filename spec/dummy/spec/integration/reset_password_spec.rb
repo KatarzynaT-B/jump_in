@@ -12,7 +12,7 @@
 #   end
 
 #   it 'redirects to login path after password update' do
-#     user.update_attribute(:password_reset_token, JumpIn::Tokenizer.generate_token)
+#     user.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
 #     visit edit_password_resets_path(token: user.password_reset_token)
 #     expect(page).to have_content("Edit for PasswordReset")
 #     fill_in "password", with: 'new_password'
@@ -22,13 +22,13 @@
 #   end
 
 #   it 'doest allow for password reset if token too old' do
-#     user.update_attribute(:password_reset_token, Base64.encode64("#{SecureRandom.hex(10)}.#{5.days.ago}"))
+#     user.update_attribute(:password_reset_token, Base64.urlsafe_encode64("#{SecureRandom.hex(10)}.#{5.days.ago}"))
 #     visit edit_password_resets_path(token: user.password_reset_token)
 #     expect(page).to have_content("password-reset-token is too old")
 #   end
 
 #   it 'displays edit page when password does not match password_confirmation' do
-#     user.update_attribute(:password_reset_token, JumpIn::Tokenizer.generate_token)
+#     user.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
 #     visit edit_password_resets_path(token: user.password_reset_token)
 #     expect(page).to have_content('Edit for PasswordReset')
 #     fill_in 'password', with: 'new_password'
