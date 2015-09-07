@@ -2,7 +2,7 @@ class SessionsController < ApplicationController
 
   def create
     user = User.find_by(email: params[:session][:email].downcase)
-    if login(user: user, password: params[:session][:password], permanent: true)
+    if user && jump_in(user: user, permanent: true, password: params[:session][:password])
       redirect_to user_path(user)
     else
       render :new
@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    logout
+    jump_out
     redirect_to login_path
   end
 end
