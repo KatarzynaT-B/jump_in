@@ -107,14 +107,14 @@ describe PasswordResetController, type: :controller do
 
   context "#password_reset_valid?" do
     it "returns true for token valid with default expiration time(2.hours)" do
-      token = JumpIn::Tokenator.generate_token
+      token = subject.generate_token
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(true)
     end
 
     it "returns false for token too old with default expiration time(2.hours)" do
       token = ''
       travel_to(3.hours.ago) do
-        token = JumpIn::Tokenator.generate_token
+        token = subject.generate_token
       end
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(false)
     end
@@ -122,7 +122,7 @@ describe PasswordResetController, type: :controller do
     it "returns true for token valid with custom expiration time(2.days)" do
       token = ''
       travel_to(1.day.ago) do
-        token = JumpIn::Tokenator.generate_token
+        token = subject.generate_token
       end
       expect(subject.password_reset_valid?(password_reset_token: token, expiration_time: 2.days)).to eq(true)
     end
@@ -130,7 +130,7 @@ describe PasswordResetController, type: :controller do
     it "returns false for token too old with custom expiration time(2.days)" do
       token = ''
       travel_to(3.days.ago) do
-        token = JumpIn::Tokenator.generate_token
+        token = subject.generate_token
       end
       expect(subject.password_reset_valid?(password_reset_token: token, expiration_time: 2.days)).to eq(false)
     end
@@ -142,7 +142,7 @@ describe PasswordResetController, type: :controller do
     let!(:old_password_digest) { user_wsp.password_digest }
 
     it "updates password if token belongs to user and is not too old" do
-      user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
+      user_wsp.update_attribute(:password_reset_token, subject.generate_token)
       token = user_wsp.password_reset_token
       allow_to_receive_token_correct_and_return(user_wsp, token, true)
 
@@ -154,7 +154,7 @@ describe PasswordResetController, type: :controller do
 
     it "updates password if token belongs to user and is old" do
       travel_to(3.days.ago) do
-        user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
+        user_wsp.update_attribute(:password_reset_token, subject.generate_token)
       end
       token = user_wsp.password_reset_token
       allow_to_receive_token_correct_and_return(user_wsp, token, true)
@@ -166,8 +166,8 @@ describe PasswordResetController, type: :controller do
     end
 
     it "does not update password and returns false if token does not belong to user" do
-      user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
-      token = JumpIn::Tokenator.generate_token
+      user_wsp.update_attribute(:password_reset_token, subject.generate_token)
+      token = subject.generate_token
       allow_to_receive_token_correct_and_return(user_wsp, token, false)
 
       expect(
@@ -177,7 +177,7 @@ describe PasswordResetController, type: :controller do
     end
 
     it "does not update password and returns false if new password invalid" do
-      user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
+      user_wsp.update_attribute(:password_reset_token, subject.generate_token)
       token = user_wsp.password_reset_token
       allow_to_receive_token_correct_and_return(user_wsp, token, true)
 
@@ -191,14 +191,14 @@ describe PasswordResetController, type: :controller do
 
   context "#token_correct?" do
     it "returns true if given token eq user.token" do
-      user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
+      user_wsp.update_attribute(:password_reset_token, subject.generate_token)
       token = user_wsp.password_reset_token
       expect(subject.token_correct?(user_token:user_wsp.password_reset_token, received_token:token)).to eq(true)
     end
 
     it "returns false if given token doesn't eq user.token" do
-      user_wsp.update_attribute(:password_reset_token, JumpIn::Tokenator.generate_token)
-      token = JumpIn::Tokenator.generate_token
+      user_wsp.update_attribute(:password_reset_token, subject.generate_token)
+      token = subject.generate_token
       expect(subject.token_correct?(user_token:user_wsp.password_reset_token, received_token:token)).to eq(false)
     end
   end
