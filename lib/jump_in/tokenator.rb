@@ -22,4 +22,3 @@ module JumpIn
     end
   end
 end
-
