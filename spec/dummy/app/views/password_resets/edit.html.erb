@@ -1,9 +1,0 @@
-Edit for PasswordReset
-
-<%= form_tag password_resets_path, method: :patch do %>
-  <%= password_field_tag :password %>
-  <%= password_field_tag :password_confirmation %>
-  <%= hidden_field_tag :token, params[:token] %>
-  <%= submit_tag "Set new password" %>
-<% end %>
-
