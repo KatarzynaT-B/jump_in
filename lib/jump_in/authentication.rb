@@ -42,20 +42,18 @@ module JumpIn
 
 # LOGGING OUT
     def jump_out
-      if session[:jump_in_id] && session[:jump_in_class]
-        delete_session
-      elsif cookies[:jump_in_id] && cookies[:jump_in_class]
-        delete_cookies
-      end
+      delete_session
+      delete_cookies
       true
     end
 
 # HELPER METHODS
     def current_user
-      return nil unless session_or_cookies_set?
-      klass = (session[:jump_in_class] || cookies.signed[:jump_in_class]).constantize
-      id    = (session[:jump_in_id] || cookies.signed[:jump_in_id])
-      @current_user ||= klass.find_by_id(id)
+      if session_set?
+        @current_user ||= user_from_session
+      elsif cookies_set?
+        @current_user ||= user_from_cookies
+      end
     end
 
     def logged_in?
@@ -63,11 +61,6 @@ module JumpIn
     end
 
     private
-    def session_or_cookies_set?
-      (session[:jump_in_id] && session[:jump_in_class]) ||
-      (cookies.signed[:jump_in_id] && cookies.signed[:jump_in_class])
-    end
-
     def detected_strategy(user:, params:)
       if strategy = JumpIn::Strategies::Base::STRATEGIES.detect { |strategy| strategy.detected?(params) }
         strategy.new(user: user, params: params)
