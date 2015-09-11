@@ -33,13 +33,13 @@ include JumpIn::Authentication
 ```
 This module provides complex `jump_in` method, two basic methods: `login` and `jump_out`, as well as two helper methods: `current_user` and `logged_in?` and extracted methods to be used according to your own preferences.
 ```
-jump_in(user:, permanent: false, expires: nil, **params)
+jump_in(user:, permanent: false, expires: nil, **auth_params)
 ```
-authenticates object and loggs it in (using `login` method). The authentication strategy depends on the passed params (detaild description below). Suggested usage of this method is (inside `SessionsController`):
+authenticates object and loggs it in (using `login` method). The authentication strategy depends on the passed auth_params (detaild description below). Suggested usage of this method is (inside `SessionsController`):
 ```
 def create
   @student = Student.find(...)
-  if @student && jump_in(user: @student, permanent: true, expires: 5.hours, password: params[:password])
+  if @student && jump_in(user: @student, permanent: true, expires: 5.hours, password: auth_params[:password])
     redirect_to ...
   else
     render :new
@@ -62,7 +62,7 @@ logs out user (it clears session or cookies depending on the previous choice of 
 * `current_user` - returns object that is currently logged in (`nil` otherwise),
 * `logged_in?` - returns `true` if any object is logged in (by means of the above mentioned login method). Otherwise it returns `false`,
 
-* `authenticate_by_strategy(user:, params:)` - returns result of strategy-authentication, returns `false` if strategy is not detected. All params needed for authentication need to be passed as hash, e.g. `authenticate_by_strategy(user: @student, params: { password: 'password'} )`,
+* `authenticate_by_strategy(user:, auth_params:)` - returns result of strategy-authentication, returns `false` if strategy is not detected. All params needed for authentication need to be passed as hash, e.g. `authenticate_by_strategy(user: @student, auth_params: { password: 'password'} )`,
 * `set_cookies(user:, expires: nil)` - sets `cookies.signed`. Default expiration time is set to 20 years as in `cookies.permanent`. You can pass your custom expiration time,
 * `set_session(user:)` - sets session,
 * `delete_cookies` - clears cookies set by `set_cookies`,
@@ -80,15 +80,15 @@ class YourClassName < ActiveRecord::Base
   has_secure_password
 end
 ```
-This strategy is being used when params passed to `jump_in` or `authenticate_by_strategy` include `:password`, therefore you should use it this way:
+This strategy is being used when auth_params passed to `jump_in` or `authenticate_by_strategy` include `:password`, therefore you should use it this way:
 ```
-jump_in(user: @student, permanent: true, expires: 30.days, password: params[:password])
+jump_in(user: @student, permanent: true, expires: 30.days, password: auth_params[:password])
 ```
-What you need to pass is the object to be authenticated (and logged in), password received in params and optionally: `permanent` and `expires` parameters (as explained in `login` method description).
+What you need to pass is the object to be authenticated (and logged in), password received in auth_params and optionally: `permanent` and `expires` parameters (as explained in `login` method description).
 
-As for the second method you should use it this way, passing the password in a hash (`params`):
+As for the second method you should use it this way, passing the password in a hash (`auth_params`):
 ```
-authenticate_by_strategy(user: @student, params: { password: params[:password] })
+authenticate_by_strategy(user: @student, auth_params: { password: 'secretpassword' })
 ```
 
 

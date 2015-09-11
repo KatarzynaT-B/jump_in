@@ -9,9 +9,9 @@ module JumpIn
         STRATEGIES << subclass
       end
 
-      def initialize(user:, params:)
+      def initialize(user:, auth_params:)
         @user = user
-        @params = params
+        @auth_params = auth_params
       end
 
       def authenticate_user

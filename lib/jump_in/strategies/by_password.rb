@@ -3,12 +3,12 @@ require 'jump_in/strategies'
 module JumpIn
   module Strategies
     class ByPassword < Base
-      def self.detected?(params)
-        params.include? :password
+      def self.detected?(auth_params)
+        auth_params.include? :password
       end
 
       def authenticate_user
-        @user.authenticate(@params[:password]) ? true : false
+        @user.authenticate(@auth_params[:password]) ? true : false
       end
     end
   end
