@@ -10,8 +10,7 @@ module JumpIn
 
 # LOGGING IN
     def jump_in(user:, permanent: false, expires: nil, **auth_params)
-      return false if logged_in?
-      if authenticate_by_strategy(user: user, auth_params: auth_params)
+      if !logged_in? && authenticate_by_strategy(user: user, auth_params: auth_params)
         login(user: user, permanent: permanent, expires: expires)
       else
         return false

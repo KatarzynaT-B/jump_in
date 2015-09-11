@@ -104,6 +104,25 @@ else
 end
 ```
 
+#### Custom strategies
+`JumpIn` provides possibility to add your own custom authentication strategy. In order to do that you need to:
+
+1. add custom `def authenticate(...)` method to the model to be authenticated.
+It must use keyword arguments. Set of the arguments should be unique in comparison to other existing strategies (list below);
+1. add new class iheriting by `JumpIn::Strategies::Base` and define:
+  - `has_unique_attributes` - array of attributes used by the abovementioned `authenticate` method, it will be used to autmatically choose authentication strategy of your preference.
+  - `authenticate_user` - that calls `@user.authenticate` with proper params.
+```
+class MyStrategy < JumpIn::Strategies::Base
+  has_unique_attributes :my_key_attribute
+
+  def authenticate_user
+    @user.authenticate(...) ? true : false
+  end
+end
+```
+List of the arguments taken by the existing default strategies:
+- `ByPassword`: [:password].
 
 ## Password Reset
 ```
