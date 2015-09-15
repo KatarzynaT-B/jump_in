@@ -1,11 +1,15 @@
+require 'jump_in/authentication/login_base'
+
 module JumpIn
   module Authentication
-    module Cookies
+    class Cookies < LoginBase
 
-      def set_cookies(user:, expires: nil)
-        expires = (expires || 20.years).from_now
-        cookies.signed[:jump_in_class] = { value: user.class.to_s, expires: expires }
-        cookies.signed[:jump_in_id]    = { value: user.id, expires: expires }
+      def perform_login
+        if @params[:permanent] == true #condition from config
+          expires = (@params[:expires] || 20.years).from_now
+          cookies.signed[:jump_in_class] = { value: @user.class.to_s, expires: expires }
+          cookies.signed[:jump_in_id]    = { value: @user.id, expires: expires }
+        end
       end
 
       def cookies_set?
@@ -17,7 +21,11 @@ module JumpIn
         klass.find_by(id: cookies.signed[:jump_in_id])
       end
 
-      def delete_cookies
+      def current_user
+        cookies_set? ? user_from_cookies : false
+      end
+
+      def perform_logout
         cookies.delete :jump_in_class
         cookies.delete :jump_in_id
       end

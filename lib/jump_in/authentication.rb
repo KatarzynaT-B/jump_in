@@ -1,11 +1,10 @@
 require 'jump_in/strategies'
 require 'jump_in/authentication/session'
 require 'jump_in/authentication/cookies'
+require 'jump_in/authentication/login_base'
 
 module JumpIn
   module Authentication
-    include JumpIn::Authentication::Session
-    include JumpIn::Authentication::Cookies
 
     include JumpIn::Strategies
 
@@ -31,29 +30,30 @@ module JumpIn
       end
     end
 
-    def login(user:, permanent: false, expires: nil)
-      if permanent
-        set_cookies(user: user, expires: expires)
-      else
-        set_session(user: user)
-      end
+    def login(user:, **login_params) # params temporary, they'll dissapear after config merge
+      LoginBase::LOGINS.each { |lgn| lgn.new(user: user, login_params: login_params).perform_login }
       true
     end
 
 # LOGGING OUT
     def jump_out
-      delete_session
-      delete_cookies
+      LoginBase::LOGINS.each { |lgn| lgn.new().perform_logout }
       true
     end
 
 # HELPER METHODS
     def current_user
-      if session_set?
-        @current_user ||= user_from_session
-      elsif cookies_set?
-        @current_user ||= user_from_cookies
-      end
+      current_user =
+        LoginBase::LOGINS.each do |lgn|
+          user = lgn.new().current_user
+          break user if user
+        end
+
+      # if session_set?
+      #   @current_user ||= user_from_session
+      # elsif cookies_set?
+      #   @current_user ||= user_from_cookies
+      # end
     end
 
     def logged_in?
