@@ -20,7 +20,7 @@ JumpIn.configure do |defaults|
   # to verify whether password_reset_token is still valid.
   # Default value is set to 2 hours.
   # If you're not interested in expiration_time for token feel free to
-  # uncomment the following line and don't use the abovementioned method in your code.
+  # comment the following line and don't use the abovementioned method in your code.
   'expiration_time' => 2.hours
   }
 end
