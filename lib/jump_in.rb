@@ -31,9 +31,10 @@ module JumpIn
 
   def self.configure(&block)
     defaults = yield
-    @conf = Configuration.new(permanent:       defaults["permanent"] || false,
-                              expires:         defaults["expires"],
-                              expiration_time: defaults["expiration_time"] || 2.hours)
+    @conf = Configuration.new(
+      permanent:       defaults["permanent"]       || false,
+      expires:         defaults["expires"],
+      expiration_time: defaults["expiration_time"] || 2.hours)
   end
 
   def self.conf

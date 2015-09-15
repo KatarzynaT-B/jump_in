@@ -29,6 +29,8 @@ Here is a complete list of modules that JumpIn provides:
 * `JumpIn::PasswordReset`
 * `JumpIn::Tokenator` (included by default when `JumpIn::PasswordReset` is included)
 
+You'll also have to customize initializer: `config/initializers/jump_in.rb` if the default setting is not what you need. Remember to insert `,` after each hash element except of the last!
+
 
 ## Authentication
 ```
@@ -36,13 +38,13 @@ include JumpIn::Authentication
 ```
 This module provides complex `jump_in` method, two basic methods: `login` and `jump_out`, as well as two helper methods: `current_user` and `logged_in?` and extracted methods to be used according to your own preferences.
 ```
-jump_in(user:, permanent: false, expires: nil, **auth_params)
+jump_in(user:, **auth_params)
 ```
 authenticates object and loggs it in (using `login` method). The authentication strategy depends on the passed auth_params (detaild description below). Suggested usage of this method is (inside `SessionsController`):
 ```
 def create
   @student = Student.find(...)
-  if @student && jump_in(user: @student, permanent: true, expires: 5.hours, password: auth_params[:password])
+  if @student && jump_in(user: @student, password: auth_params[:password])
     redirect_to ...
   else
     render :new
@@ -50,11 +52,11 @@ def create
 end
 ```
 ```
-login(user:, permanent: false, expires: nil)
+login(user:)
 ```
-sets session for the given user (object) if `permanent` is not passed or is passed as `false`, e.g. `login(user: @student)`.
-
-It sets `cookies.signed` if `permanent` is passed as `true`. Default expiration time is set to 20 years (same as `cookies.permanent`). It is also possible to set custom expiration time for the cookies, e.g. `login(user: @student, permanent: true, expires: 24.hours)`.
+depends on settings located in `config/initializers/jump_in.rb`:
+- it sets `session` for the given user (object) if `permanent` is set to `false`,
+- it sets `cookies.signed` if `permanent` is set to `true`. Default expiration time is set to 20 years (same as `cookies.permanent`). You can modify the default expiration time.
 
 If you're not using the comprehensive method `jump_in`, it is suggested to use `login` method as follows: `login(user: @student) unless logged_in?`
 ```
@@ -66,7 +68,7 @@ logs out user (it clears session or cookies depending on the previous choice of 
 * `logged_in?` - returns `true` if any object is logged in (by means of the above mentioned login method). Otherwise it returns `false`,
 
 * `authenticate_by_strategy(user:, auth_params:)` - returns result of strategy-authentication, returns `false` if strategy is not detected. All params needed for authentication need to be passed as hash, e.g. `authenticate_by_strategy(user: @student, auth_params: { password: 'password'} )`,
-* `set_cookies(user:, expires: nil)` - sets `cookies.signed`. Default expiration time is set to 20 years as in `cookies.permanent`. You can pass your custom expiration time,
+* `set_cookies(user:)` - sets `cookies.signed`. Expiration time depends on `config/initializers/jump_in.rb`, default value is set to 20 years as in `cookies.permanent`,
 * `set_session(user:)` - sets session,
 * `delete_cookies` - clears cookies set by `set_cookies`,
 * `delete_session` - clears session set by `set_session`.
@@ -155,9 +157,9 @@ The subsidiary methods are:
 * `token_uniq?(user:, token:)` - checks uniqueness of the given token in scope of the passed object's class.
 
 ```
-password_reset_valid?(password_reset_token:, expiration_time: 2.hours)
+password_reset_valid?(password_reset_token:)
 ```
-checkes wheather the given token is still valid (has not expired). Returns `true` or `false`. Default expiration time is 2 hours. You can pass any custom value of your choice as well. This method is suitable for any token generated with `JumpIn::Tokenator`.
+checkes wheather the given token is still valid (has not expired). Returns `true` or `false`. Default expiration time is 2 hours. You can change this value in `config/initializers/jump_in.rb`. This method is suitable for token generated with `JumpIn::Tokenator`.
 ```
 update_password_for(user:, password:, password_confirmation:, password_reset_token:)
 ```

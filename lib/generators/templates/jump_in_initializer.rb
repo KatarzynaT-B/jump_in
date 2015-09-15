@@ -7,12 +7,15 @@ JumpIn.configure do |defaults|
   # for `permanent` set to
   # - true - login method sets cookies,
   # - false - login method sets session.
-  'permanent' => true,
+
+  'permanent' => true
 
   # `expires` is used by login method only when `permanent` is set to true
   # It defines expiration time for cookies.
   # Default value is set to 20 years - as in cookies.permanent.
-  'expires' => 20.years
+  # You can uncomment the line below and change it.
+
+  # 'expires' => 24.hours
 
   # PASSWORD RESET
 
@@ -20,6 +23,7 @@ JumpIn.configure do |defaults|
   # to verify whether password_reset_token is still valid.
   # Default value is set to 2 hours.
   # You can uncomment the line below and change it.
+
   # 'expiration_time' => 5.hours
   }
 end
