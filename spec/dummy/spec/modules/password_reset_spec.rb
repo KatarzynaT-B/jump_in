@@ -106,35 +106,20 @@ describe PasswordResetController, type: :controller do
   end
 
   context "#password_reset_valid?" do
-    it "returns true for token valid with default expiration time(2.hours)" do
-      token = subject.generate_token
+    it "returns true for token valid" do
+      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(expiration_time: 2.hours))
+      token = JumpIn::Tokenator.generate_token
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(true)
     end
 
-    it "returns false for token too old with default expiration time(2.hours)" do
+    it "returns false for token too old" do
+      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(expiration_time: 2.hours))
       token = ''
       travel_to(3.hours.ago) do
         token = subject.generate_token
       end
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(false)
     end
-
-    it "returns true for token valid with custom expiration time(2.days)" do
-      token = ''
-      travel_to(1.day.ago) do
-        token = subject.generate_token
-      end
-      expect(subject.password_reset_valid?(password_reset_token: token, expiration_time: 2.days)).to eq(true)
-    end
-
-    it "returns false for token too old with custom expiration time(2.days)" do
-      token = ''
-      travel_to(3.days.ago) do
-        token = subject.generate_token
-      end
-      expect(subject.password_reset_valid?(password_reset_token: token, expiration_time: 2.days)).to eq(false)
-    end
-
   end
 
   context "#update_password_for" do
