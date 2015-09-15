@@ -12,7 +12,7 @@ describe SomeController do
       'permanent' => permanent,
       'expires' => expires,
       'expiration_time' => expiration_time
-    }
+      }
     end
   end
 
@@ -35,5 +35,12 @@ describe SomeController do
     expect(JumpIn.conf.permanent).to eq(nil)
     expect(JumpIn.conf.expires).to eq(nil)
     expect(JumpIn.conf.expiration_time).to eq(2.hours)
+  end
+
+  it 'raises an error if no configuration was run' do
+    JumpIn.instance_variable_set('@conf', nil)
+    expect {
+      JumpIn.conf
+    }.to raise_error(JumpIn::ConfigurationError, 'JumpInConfiguration not available, run initializer jump_in.rb.')
   end
 end

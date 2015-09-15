@@ -26,7 +26,7 @@ module JumpIn
 
   class ConfigurationError < Error
     def initialize
-      message = "JumpInConfiguration not available, run initializer jump_in.rb."
+      message = 'JumpInConfiguration not available, run initializer jump_in.rb.'
       super(message)
     end
   end
