@@ -5,8 +5,6 @@ require 'jump_in/authentication/cookies'
 require 'jump_in/strategies'
 require 'jump_in/password_reset'
 require 'jump_in/tokenator'
-# require 'jump_in/generators/jump_in/install_generator'      ?????
-# require 'jump_in/generators/templates/jump_in_initializer'  ?????
 
 module JumpIn
 

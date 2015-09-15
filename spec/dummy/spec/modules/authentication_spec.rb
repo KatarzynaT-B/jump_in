@@ -7,6 +7,7 @@ end
 
 describe AuthenticationController, type: :controller do
   let(:user_wsp) { FactoryGirl.create(:user_with_secure_password) }
+  after(:all) { JumpIn.instance_variable_set('@conf', nil) }
 
   context ".jumpin_callback" do
     it "it added default constants while including Session & Cookies" do
@@ -28,6 +29,8 @@ describe AuthenticationController, type: :controller do
   end
 
   context "#jump_in" do
+    before(:all) { JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(permanent: false)) }
+
     it "returns false if user logged_in" do
       allow_to_receive_logged_in_and_return(true)
       expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(false)
@@ -53,42 +56,22 @@ describe AuthenticationController, type: :controller do
     context 'when user not logged_in and authentication successful' do
       it "returns true" do
         allow_to_receive_logged_in_and_return(false)
+        allow(subject).to receive(:login).with(user: user_wsp).and_return(true)
         expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
-      end
-
-      it "calls 'login' with permanent=false for permanent false by default" do
-        allow_to_receive_logged_in_and_return(false)
-        expect(subject).to receive(:login).with(user:user_wsp, permanent:false, expires:nil).exactly(1).times.and_return(true)
-        subject.jump_in(user: user_wsp, password: user_wsp.password)
-      end
-
-      it "calls 'login' with permanent=false for permanent passed as false" do
-        allow_to_receive_logged_in_and_return(false)
-        expect(subject).to receive(:login).with(user: user_wsp, permanent:false, expires:nil).exactly(1).times.and_return(true)
-        subject.jump_in(user: user_wsp, password: user_wsp.password, permanent: false)
-      end
-
-      it "calls 'login' with permanent=true for permanent passed as true" do
-        allow_to_receive_logged_in_and_return(false)
-        expect(subject).to receive(:login).with(user:user_wsp, permanent:true, expires:nil).exactly(1).times.and_return(true)
-        subject.jump_in(user: user_wsp, password: user_wsp.password, permanent: true)
       end
     end
   end
 
   context "#login" do
-    it "sets session when permanent not passed (default)" do
+    it "sets session when @conf.permanent is false" do
+      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(permanent: false))
       subject.login(user: user_wsp)
       expect_only_session_set_for(user_wsp)
     end
 
-    it "sets session when permanent passed as false" do
-      subject.login(user: user_wsp, permanent: false)
-      expect_only_session_set_for(user_wsp)
-    end
-
-    it "sets cookies when permanent passed as true" do
-      subject.login(user: user_wsp, permanent: true)
+    it "sets cookies when @conf.permanent is true" do
+      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(permanent: true))
+      subject.login(user: user_wsp)
       expect_only_cookies_set_for(user_wsp)
     end
 
@@ -100,14 +83,16 @@ describe AuthenticationController, type: :controller do
         allow(@cookies).to receive(:signed).and_return(@cookies)
       end
 
-      it "sets 20 years if param not passed" do
-        subject.login(user: user_wsp, permanent: true)
+      it "sets 20 years if @conf.expires not set" do
+        JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(permanent: true))
+        subject.login(user: user_wsp)
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
       end
 
-      it "sets correct value if param passed" do
-        subject.login(user: user_wsp, permanent: true, expires: 2.hours)
+      it "sets correct value if @conf.expires set" do
+        JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(permanent: true, expires: 2.hours))
+        subject.login(user: user_wsp)
         expect(@cookies.signed[:jump_in_class][:expires]).to eq(@cookies.signed[:jump_in_id][:expires])
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)

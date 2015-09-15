@@ -10,9 +10,9 @@ module JumpIn
           klass.jumpin_callback :get_current_user, :current_user_from_cookies
         end
 
-        def set_user_cookies(user:, login_params:)
-          if login_params[:permanent] == true #condition from config
-            expires = (login_params[:expires] || 20.years).from_now
+        def set_user_cookies(user:)
+          if JumpIn.conf.permanent
+            expires = (JumpIn.conf.expires || 20.years).from_now
             cookies.signed[:jump_in_class] = { value: user.class.to_s, expires: expires }
             cookies.signed[:jump_in_id]    = { value: user.id, expires: expires }
           end
