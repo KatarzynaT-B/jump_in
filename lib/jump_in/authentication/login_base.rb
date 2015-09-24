@@ -1,11 +1,16 @@
 module JumpIn
   module Authentication
     module LoginBase
-      def ensure_login_constants_in(klass)
-        klass.const_set('ON_LOGIN', []) unless defined?(klass::ON_LOGIN)
-        klass.const_set('ON_LOGOUT', []) unless defined?(klass::ON_LOGOUT)
-        klass.const_set('GET_CURRENT_USER', []) unless defined?(klass::GET_CURRENT_USER)
+      def jumpin_callback(klass, callback, method_to_be_called)
+        jumpin_constant = callback.upcase
+        unless klass.constants.include?(jumpin_constant)
+          klass.const_set(jumpin_constant, [])
+        end
+        list = klass.const_get(jumpin_constant)
+        list << method_to_be_called
       end
     end
   end
 end
+
+

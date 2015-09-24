@@ -6,10 +6,9 @@ module JumpIn
       extend JumpIn::Authentication::LoginBase
 
       def self.included(klass)
-        ensure_login_constants_in(klass)
-        klass::ON_LOGIN         << :set_user_session
-        klass::ON_LOGOUT        << :remove_user_session
-        klass::GET_CURRENT_USER << :current_user_from_session
+        jumpin_callback klass, :on_login,         :set_user_session
+        jumpin_callback klass, :on_logout,        :remove_user_session
+        jumpin_callback klass, :get_current_user, :current_user_from_session
       end
 
       def set_user_session(user:, login_params:)
