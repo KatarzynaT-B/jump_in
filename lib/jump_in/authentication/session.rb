@@ -1,36 +1,43 @@
 require 'jump_in/authentication/login_base'
 
-
 module JumpIn
   module Authentication
     module Session
-      include JumpIn::Authentication::LoginBase
+      extend JumpIn::Authentication::LoginBase
 
-      def self.perform_login(user:, contr:, login_params:)
+      def self.included(klass)
+        ensure_login_constants_in(klass)
+        klass::ON_LOGIN         << :set_user_session
+        klass::ON_LOGOUT        << :remove_user_session
+        klass::GET_CURRENT_USER << :current_user_from_session
+      end
+
+      def set_user_session(user:, login_params:)
         unless login_params[:permanent] #condition from config
-          contr.session[:jump_in_class] = user.class.to_s
-          contr.session[:jump_in_id]    = user.id
+          session[:jump_in_class] = user.class.to_s
+          session[:jump_in_id]    = user.id
         end
       end
 
-      def self.session_set?(contr:)
-        contr.session[:jump_in_id] && contr.session[:jump_in_class]
+      def remove_user_session
+        session.delete :jump_in_class
+        session.delete :jump_in_id
       end
 
-      def self.user_from_session(contr:)
-        klass = contr.session[:jump_in_class].constantize
-        klass.find_by(id: contr.session[:jump_in_id])
+      def current_user_from_session
+        session_set? ? user_from_session : nil
       end
 
-      def self.current_user(contr:)
-        session_set?(contr: contr) ? user_from_session(contr: contr) : nil
+      private
+
+      def session_set?
+        session[:jump_in_id] && session[:jump_in_class]
       end
 
-      def self.perform_logout(contr:)
-        contr.session.delete :jump_in_class
-        contr.session.delete :jump_in_id
+      def user_from_session
+        klass = session[:jump_in_class].constantize
+        klass.find_by(id: session[:jump_in_id])
       end
-
     end
   end
 end

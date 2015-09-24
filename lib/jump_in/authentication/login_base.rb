@@ -1,22 +1,11 @@
 module JumpIn
   module Authentication
     module LoginBase
-      LOGINS = []
-
-      def self.included(login_module)
-        JumpIn::Authentication::LoginBase::LOGINS << login_module
+      def ensure_login_constants_in(klass)
+        klass.const_set('ON_LOGIN', []) unless defined?(klass::ON_LOGIN)
+        klass.const_set('ON_LOGOUT', []) unless defined?(klass::ON_LOGOUT)
+        klass.const_set('GET_CURRENT_USER', []) unless defined?(klass::GET_CURRENT_USER)
       end
-
-      def self.perform_login(user: nil, contr: nil, login_params: nil)
-      end
-
-      def self.current_user(contr: nil)
-        nil
-      end
-
-      def self.perform_logout(contr: nil)
-      end
-
     end
   end
 end
