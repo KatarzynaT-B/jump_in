@@ -1,25 +1,20 @@
 module JumpIn
   module Authentication
-    class LoginBase
+    module LoginBase
       LOGINS = []
 
-      def self.inherited(subclass)
-        LOGINS << subclass
+      def self.included(login_module)
+        JumpIn::Authentication::LoginBase::LOGINS << login_module
       end
 
-      def initialize(user: nil, login_params: nil) #login params to be removed after config merge
-        @user = user
-        @params = login_params
+      def self.perform_login(user: nil, contr: nil, login_params: nil)
       end
 
-      def perform_login(user:)
+      def self.current_user(contr: nil)
+        nil
       end
 
-      def current_user
-        false
-      end
-
-      def perform_logout(user:)
+      def self.perform_logout(contr: nil)
       end
 
     end

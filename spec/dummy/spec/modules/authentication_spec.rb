@@ -2,6 +2,8 @@ require_relative '../spec_helper'
 
 class AuthenticationController < ActionController::Base
   include JumpIn::Authentication
+  include JumpIn::Authentication::Session
+  include JumpIn::Authentication::Cookies
 end
 
 describe AuthenticationController, type: :controller do

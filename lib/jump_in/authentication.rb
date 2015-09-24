@@ -30,34 +30,28 @@ module JumpIn
       end
     end
 
-    def login(user:, **login_params) # params temporary, they'll dissapear after config merge
-      LoginBase::LOGINS.each { |lgn| lgn.new(user: user, login_params: login_params).perform_login }
+    def login(user:, contr: self, **login_params) # params temporary, they'll dissapear after config merge
+      LoginBase::LOGINS.each { |lgn| lgn.perform_login(user: user, contr: contr, login_params: login_params) }
       true
     end
 
 # LOGGING OUT
-    def jump_out
-      LoginBase::LOGINS.each { |lgn| lgn.new().perform_logout }
+    def jump_out(contr: self)
+      LoginBase::LOGINS.each { |lgn| lgn.perform_logout(contr: contr) }
       true
     end
 
 # HELPER METHODS
-    def current_user
+    def current_user(contr: self)
       current_user =
         LoginBase::LOGINS.each do |lgn|
-          user = lgn.new().current_user
+          user = lgn.current_user(contr: contr)
           break user if user
         end
-
-      # if session_set?
-      #   @current_user ||= user_from_session
-      # elsif cookies_set?
-      #   @current_user ||= user_from_cookies
-      # end
     end
 
-    def logged_in?
-      !!current_user
+    def logged_in?(contr: self)
+      !!current_user(contr: contr)
     end
 
     private
