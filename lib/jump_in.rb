@@ -22,13 +22,6 @@ module JumpIn
     end
   end
 
-  class ConfigurationError < Error
-    def initialize
-      message = 'JumpInConfiguration not available, run initializer jump_in.rb.'
-      super(message)
-    end
-  end
-
   def self.configure(&block)
     defaults = yield
     @conf = Configuration.new(
@@ -38,7 +31,7 @@ module JumpIn
   end
 
   def self.conf
-    @conf || (raise JumpIn::ConfigurationError)
+    @conf || Configuration.new(permanent: false, expiration_time: 2.hours)
   end
 
   class Configuration

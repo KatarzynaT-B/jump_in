@@ -12,10 +12,14 @@ gem 'jump_in'
 ```
 Don't forget to run: `$ bundle install`.
 
-After you install JumpIn, you need to run the generator:
+At this point (or later), if you want to modify default `JumpIn` configuration (as you'll read further: `permanent`, `expires`, `expiration_time`), you need to run the generator. It will create `config/initializers/jump_in.rb` for you:
 ```
 $ rails generate jump_in:install
 ```
+If the default settings of the above mentioned file is not what you need, feel free to modify it. Remember to insert `,` after each hash element except of the last!
+
+/Whenever we mention `config/initializers/jump_in.rb` further in the text, we asume you have run the `rails generate` command./
+
 
 In order to use JumpIn you need to include modules of your choice in `application_controller.rb` or in a controller responsible for a particular functionality. For example in case of logging in with password and using password reset functionality you'll need:
 ```
@@ -28,8 +32,6 @@ Here is a complete list of modules that JumpIn provides:
 * `JumpIn::Authentication`
 * `JumpIn::PasswordReset`
 * `JumpIn::Tokenator` (included by default when `JumpIn::PasswordReset` is included)
-
-You'll also have to customize initializer: `config/initializers/jump_in.rb` if the default setting is not what you need. Remember to insert `,` after each hash element except of the last!
 
 
 ## Authentication
@@ -55,8 +57,8 @@ end
 login(user:)
 ```
 depends on settings located in `config/initializers/jump_in.rb`:
-- it sets `session` for the given user (object) if `permanent` is set to `false`,
-- it sets `cookies.signed` if `permanent` is set to `true`. Default expiration time is set to 20 years (same as `cookies.permanent`). You can modify the default expiration time.
+- it sets `session` for the given user (object) if `permanent` is set to `false` (`false` is default `JumpIn` config),
+- it sets `cookies.signed` if `permanent` is set to `true`. Suggested expiration time is 20 years (same as `cookies.permanent`). You can modify the expiration time in `config/initializers/jump_in.rb`.
 
 If you're not using the comprehensive method `jump_in`, it is suggested to use `login` method as follows: `login(user: @student) unless logged_in?`
 ```
