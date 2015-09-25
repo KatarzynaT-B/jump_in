@@ -1,14 +1,12 @@
-require 'jump_in/authentication/login_base'
+require 'jump_in/authentication'
 
 module JumpIn
   module Authentication
     module Cookies
-      extend JumpIn::Authentication::LoginBase
-
       def self.included(klass)
-        jumpin_callback klass, :on_login,         :set_user_cookies
-        jumpin_callback klass, :on_logout,        :remove_user_cookies
-        jumpin_callback klass, :get_current_user, :current_user_from_cookies
+        klass.jumpin_callback :on_login,         :set_user_cookies
+        klass.jumpin_callback :on_logout,        :remove_user_cookies
+        klass.jumpin_callback :get_current_user, :current_user_from_cookies
       end
 
       def set_user_cookies(user:, login_params:)

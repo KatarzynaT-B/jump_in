@@ -9,6 +9,25 @@ end
 describe AuthenticationController, type: :controller do
   let(:user_wsp) { FactoryGirl.create(:user_with_secure_password) }
 
+  context ".jumpin_callback" do
+    it "it added default constants while including Session & Cookies" do
+      expect(subject.class.constants).to include(:ON_LOGIN)
+      expect(subject.class.constants).to include(:ON_LOGOUT)
+      expect(subject.class.constants).to include(:GET_CURRENT_USER)
+    end
+
+    it "creates constant with method if constant didn't exist" do
+      subject.class.jumpin_callback :a_callback, :method
+      expect(subject.class.const_get(:A_CALLBACK)).to eq([:method])
+    end
+
+    it 'adds method if constant existed' do
+      subject.class.const_set('B_CALLBACK', [:method_1])
+      subject.class.jumpin_callback :b_callback, :method_2
+      expect(subject.class.const_get(:B_CALLBACK)).to eq([:method_1, :method_2])
+    end
+  end
+
   context "#jump_in" do
     it "returns false if user logged_in" do
       allow_to_receive_logged_in_and_return(true)

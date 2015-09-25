@@ -1,7 +1,6 @@
 require 'jump_in/strategies'
 require 'jump_in/authentication/session'
 require 'jump_in/authentication/cookies'
-require 'jump_in/authentication/login_base'
 
 module JumpIn
   module Authentication
@@ -10,6 +9,7 @@ module JumpIn
 
     def self.included(base)
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
+      base.extend(ClassMethods)
     end
 
 # LOGGING IN
@@ -49,11 +49,23 @@ module JumpIn
       @current_user = get_current_user
     end
 
-
     def logged_in?
       !!current_user
     end
 
+# CLASS METHODS
+    module ClassMethods
+      def jumpin_callback(callback, method_to_be_called)
+        jumpin_constant = callback.upcase
+        unless constants.include?(jumpin_constant)
+          const_set(jumpin_constant, [])
+        end
+        list = const_get(jumpin_constant)
+        list << method_to_be_called
+      end
+    end
+
+# PRIVATE
     private
 
     def get_current_user
