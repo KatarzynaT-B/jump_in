@@ -1,10 +1,8 @@
 require 'jump_in/strategies'
-require 'jump_in/authentication/session'
-require 'jump_in/authentication/cookies'
+require 'jump_in/persistence'
 
 module JumpIn
   module Authentication
-
     def self.included(base)
       base.extend(ClassMethods)
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
@@ -60,6 +58,13 @@ module JumpIn
         end
         list = const_get(jumpin_constant)
         list << method_to_be_called
+      end
+
+      def jumpin_use(persistence:)
+        persistence.each do |symbol|
+          symbol = symbol.capitalize
+          self.include(JumpIn::Authentication::Persistence.const_get(symbol))
+        end
       end
     end
 
