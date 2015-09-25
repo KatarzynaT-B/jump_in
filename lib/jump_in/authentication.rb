@@ -45,19 +45,26 @@ module JumpIn
 
 # HELPER METHODS
     def current_user
-      current_user =
-        self.class::GET_CURRENT_USER.each do |current_user_finder|
-          user = self.send(current_user_finder)
-          break user if user
-        end
-      current_user.is_a?(Array) ? nil : current_user
+      return @current_user if defined?(@current_user)
+      @current_user = get_current_user
     end
+
 
     def logged_in?
       !!current_user
     end
 
     private
+
+    def get_current_user
+      current_user = nil
+      self.class::GET_CURRENT_USER.each do |current_user_finder|
+        current_user = self.send(current_user_finder)
+        break if current_user
+      end
+      current_user
+    end
+
     def detected_strategy(user:, params:)
       if strategy = JumpIn::Strategies::Base::STRATEGIES.detect { |strategy| strategy.detected?(params) }
         strategy.new(user: user, params: params)
