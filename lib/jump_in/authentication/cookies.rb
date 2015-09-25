@@ -23,18 +23,12 @@ module JumpIn
       end
 
       def current_user_from_cookies
-        cookies_set? ? user_from_cookies : nil
-      end
-
-      private
-
-      def cookies_set?
-        cookies.signed[:jump_in_id] && cookies.signed[:jump_in_class]
-      end
-
-      def user_from_cookies
-        klass = cookies.signed[:jump_in_class].constantize
-        klass.find_by(id: cookies.signed[:jump_in_id])
+        if cookies.signed[:jump_in_id] && cookies.signed[:jump_in_class]
+          klass = cookies.signed[:jump_in_class].constantize
+          klass.find_by(id: cookies.signed[:jump_in_id])
+        else
+          nil
+        end
       end
     end
   end

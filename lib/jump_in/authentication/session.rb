@@ -22,18 +22,12 @@ module JumpIn
       end
 
       def current_user_from_session
-        session_set? ? user_from_session : nil
-      end
-
-      private
-
-      def session_set?
-        session[:jump_in_id] && session[:jump_in_class]
-      end
-
-      def user_from_session
-        klass = session[:jump_in_class].constantize
-        klass.find_by(id: session[:jump_in_id])
+        if session[:jump_in_id] && session[:jump_in_class]
+          klass = session[:jump_in_class].constantize
+          klass.find_by(id: session[:jump_in_id])
+        else
+          nil
+        end
       end
     end
   end

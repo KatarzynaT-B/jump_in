@@ -5,11 +5,9 @@ require 'jump_in/authentication/cookies'
 module JumpIn
   module Authentication
 
-    include JumpIn::Strategies
-
     def self.included(base)
-      base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
       base.extend(ClassMethods)
+      base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
     end
 
 # LOGGING IN
