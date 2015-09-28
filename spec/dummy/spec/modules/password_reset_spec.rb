@@ -108,7 +108,7 @@ describe PasswordResetController, type: :controller do
   context "#password_reset_valid?" do
     it "returns true for token valid" do
       JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(expiration_time: 2.hours))
-      token = JumpIn::Tokenator.generate_token
+      token = subject.generate_token
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(true)
     end
 

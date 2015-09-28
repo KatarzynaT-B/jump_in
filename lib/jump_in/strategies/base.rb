@@ -14,7 +14,7 @@ module JumpIn
         unique_attributes.sort!
         if DETECTABLE_ATTRIBUTES.values.include?(unique_attributes)
           STRATEGIES.delete(self.name.constantize)
-          raise JumpIn::AttributeNotUnique
+          raise JumpIn::AttributesNotUnique
         end
         DETECTABLE_ATTRIBUTES[self.name.constantize] = unique_attributes
       end

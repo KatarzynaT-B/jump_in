@@ -22,12 +22,17 @@ module JumpIn
     end
   end
 
+  class AttributesNotUnique < Error
+    def initialize
+      super("Custom authentication strategy attribute is not unique.")
+    end
+  end
+
   def self.configure(&block)
-    defaults = yield
-    @conf = Configuration.new(
-      permanent:       defaults["permanent"]       || false,
-      expires:         defaults["expires"],
-      expiration_time: defaults["expiration_time"] || 2.hours)
+    custom_config = yield
+    @conf = Configuration.new(permanent:       custom_config["permanent"] || false,
+                              expires:         custom_config["expires"],
+                              expiration_time: custom_config["expiration_time"] || 2.hours)
   end
 
   def self.conf

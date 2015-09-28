@@ -64,7 +64,7 @@ describe JumpIn::Strategies do
         class AnotherCustomStrategy < JumpIn::Strategies::Base
           has_unique_attributes [:custom_attr]
         end
-      }.to raise_error(JumpIn::AttributeNotUnique, 'Custom authentication strategy attribute is not unique.')
+      }.to raise_error(JumpIn::AttributesNotUnique, 'Custom authentication strategy attribute is not unique.')
       expect(JumpIn::Strategies::Base::STRATEGIES).to_not include(AnotherCustomStrategy)
     end
   end
