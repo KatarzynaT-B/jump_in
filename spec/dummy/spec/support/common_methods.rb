@@ -1,3 +1,12 @@
+
+def run_config(permanent: false, expires: 20.years, expiration_time: 2.hours)
+  JumpIn.configure do |config|
+    config.permanent = permanent
+    config.expires = expires
+    config.expiration_time = expiration_time
+  end
+end
+
 # module Authentication
 
 def set_session(object)
@@ -53,12 +62,3 @@ def allow_to_receive_token_correct_and_return(user, token, boolean)
     with(user_token: user.password_reset_token, received_token: token).
     and_return(boolean)
 end
-
-# dummy App
-
-def log_in(email, password)
-  fill_in "session_email", with: email
-  fill_in "session_password", with: password
-  click_button "Log in"
-end
-

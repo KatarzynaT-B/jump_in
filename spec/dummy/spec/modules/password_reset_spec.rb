@@ -106,14 +106,13 @@ describe PasswordResetController, type: :controller do
   end
 
   context "#password_reset_valid?" do
+    before(:each) { run_config(expiration_time: 2.hours) }
     it "returns true for token valid" do
-      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(expiration_time: 2.hours))
       token = subject.generate_token
       expect(subject.password_reset_valid?(password_reset_token: token)).to eq(true)
     end
 
     it "returns false for token too old" do
-      JumpIn.instance_variable_set('@conf', JumpIn::Configuration.new(expiration_time: 2.hours))
       token = ''
       travel_to(3.hours.ago) do
         token = subject.generate_token
