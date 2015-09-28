@@ -12,16 +12,19 @@ module JumpIn
 
   class InvalidTokenError < Error
     def initialize
-      message = "Invalid token passed."
-      super(message)
+      super("Invalid token passed.")
     end
   end
 
   class AuthenticationStrategyError < Error
     def initialize
-      message = "No authentication strategy detected."
-      super(message)
+      super("No authentication strategy detected.")
     end
   end
 
+  class AttributeNotUnique < Error
+    def initialize
+      super("Custom authentication strategy attribute is not unique.")
+    end
+  end
 end

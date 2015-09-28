@@ -8,19 +8,17 @@ module JumpIn
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
     end
 
-    # LOGGING IN
-
-    def jump_in(user:, permanent: false, expires: nil, **params)
-      return false if logged_in?
-      if authenticate_by_strategy(user: user, params: params)
+# LOGGING IN
+    def jump_in(user:, permanent: false, expires: nil, **auth_params)
+      if !logged_in? && authenticate_by_strategy(user: user, auth_params: auth_params)
         login(user: user, permanent: permanent, expires: expires)
       else
         return false
       end
     end
 
-    def authenticate_by_strategy(user:, params:)
-      if strategy = detected_strategy(user: user, params: params)
+    def authenticate_by_strategy(user:, auth_params:)
+      if strategy = detected_strategy(user: user, auth_params: auth_params)
         strategy.authenticate_user
       else
         false
@@ -83,9 +81,9 @@ module JumpIn
       current_user
     end
 
-    def detected_strategy(user:, params:)
-      if strategy = JumpIn::Strategies::Base::STRATEGIES.detect { |strategy| strategy.detected?(params) }
-        strategy.new(user: user, params: params)
+    def detected_strategy(user:, auth_params:)
+      if strategy = JumpIn::Strategies::Base::STRATEGIES.detect { |strategy| strategy.detected?(auth_params) }
+        strategy.new(user: user, auth_params: auth_params)
       else
         raise JumpIn::AuthenticationStrategyError
       end

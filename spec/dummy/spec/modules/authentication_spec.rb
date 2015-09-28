@@ -35,8 +35,8 @@ describe AuthenticationController, type: :controller do
 
     it "calls detect_strategy with proper params" do
       allow_to_receive_logged_in_and_return(false)
-      expect(subject).to receive(:detected_strategy).with(user: user_wsp, params: { password: user_wsp.password }).
-        exactly(1).times.and_return(JumpIn::Strategies::ByPassword.new(user: user_wsp, params: { password: user_wsp.password }))
+      expect(subject).to receive(:detected_strategy).with(user: user_wsp, auth_params: { password: user_wsp.password }).
+        exactly(1).times.and_return(JumpIn::Strategies::ByPassword.new(user: user_wsp, auth_params: { password: user_wsp.password }))
       subject.jump_in(user: user_wsp, password: user_wsp.password)
     end
 
