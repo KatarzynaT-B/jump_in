@@ -10,7 +10,7 @@ module JumpIn
 
   class Error < StandardError; end
 
-  class InvalidTokenError < Error;
+  class InvalidTokenError < Error
     def initialize
       message = "Invalid token passed."
       super(message)

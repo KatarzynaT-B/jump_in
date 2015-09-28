@@ -8,7 +8,8 @@ module JumpIn
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
     end
 
-# LOGGING IN
+    # LOGGING IN
+
     def jump_in(user:, permanent: false, expires: nil, **params)
       return false if logged_in?
       if authenticate_by_strategy(user: user, params: params)
@@ -33,13 +34,15 @@ module JumpIn
       true
     end
 
-# LOGGING OUT
+    # LOGGING OUT
+
     def jump_out
       self.class::ON_LOGOUT.each { |on_logout| self.send(on_logout) }
       true
     end
 
-# HELPER METHODS
+    # HELPER METHODS
+
     def current_user
       return @current_user if defined?(@current_user)
       @current_user = get_current_user
@@ -49,26 +52,26 @@ module JumpIn
       !!current_user
     end
 
-# CLASS METHODS
+    # CLASS METHODS
+
     module ClassMethods
       def jumpin_callback(callback, method_to_be_called)
         jumpin_constant = callback.upcase
         unless constants.include?(jumpin_constant)
           const_set(jumpin_constant, [])
         end
-        list = const_get(jumpin_constant)
-        list << method_to_be_called
+        const_get(jumpin_constant) << method_to_be_called
       end
 
       def jumpin_use(persistence:)
         persistence.each do |symbol|
-          symbol = symbol.capitalize
-          self.include(JumpIn::Authentication::Persistence.const_get(symbol))
+          self.include(JumpIn::Authentication::Persistence.const_get(symbol.capitalize))
         end
       end
     end
 
-# PRIVATE
+    # PRIVATE
+
     private
 
     def get_current_user
