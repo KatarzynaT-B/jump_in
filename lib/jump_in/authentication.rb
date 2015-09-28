@@ -8,10 +8,10 @@ module JumpIn
       base.send :helper_method, :current_user, :logged_in? if base.respond_to? :helper_method
     end
 
-# LOGGING IN
-    def jump_in(user:, permanent: false, expires: nil, **auth_params)
+    # LOGGING IN
+    def jump_in(user:, **auth_params)
       if !logged_in? && authenticate_by_strategy(user: user, auth_params: auth_params)
-        login(user: user, permanent: permanent, expires: expires)
+        login(user: user)
       else
         return false
       end
@@ -25,9 +25,9 @@ module JumpIn
       end
     end
 
-    def login(user:, **login_params) # params temporary, they'll dissapear after config merge
+    def login(user:)
       self.class::ON_LOGIN.each do |on_login|
-        self.send(on_login, user: user, login_params: login_params)
+        self.send(on_login, user: user)
       end
       true
     end

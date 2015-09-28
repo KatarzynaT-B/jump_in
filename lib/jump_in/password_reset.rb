@@ -34,8 +34,8 @@ module JumpIn
     end
 
 # RECEIVING TOKEN
-    def password_reset_valid?(password_reset_token:, expiration_time: 2.hours)
-      decode_time(password_reset_token) > Time.now - expiration_time
+    def password_reset_valid?(password_reset_token:)
+      decode_time(password_reset_token) > Time.now - JumpIn.conf.expiration_time
     end
 
     def update_password_for(user:, password:, password_confirmation:, password_reset_token:)

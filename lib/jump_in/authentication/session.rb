@@ -10,8 +10,8 @@ module JumpIn
           klass.jumpin_callback :get_current_user, :current_user_from_session
         end
 
-        def set_user_session(user:, login_params:)
-          unless login_params[:permanent] #condition from config
+        def set_user_session(user:)
+          unless JumpIn.conf.permanent
             session[:jump_in_class] = user.class.to_s
             session[:jump_in_id]    = user.id
           end

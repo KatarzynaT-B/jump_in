@@ -8,23 +8,46 @@ require 'jump_in/tokenator'
 
 module JumpIn
 
-  class Error < StandardError; end
+  class Error < StandardError
+    def initialize
+      super(message)
+    end
+  end
 
   class InvalidTokenError < Error
-    def initialize
-      super("Invalid token passed.")
+    def message
+      "Invalid token passed."
     end
   end
 
   class AuthenticationStrategyError < Error
-    def initialize
-      super("No authentication strategy detected.")
+    def message
+      "No authentication strategy detected."
     end
   end
 
-  class AttributeNotUnique < Error
-    def initialize
-      super("Custom authentication strategy attribute is not unique.")
+  class AttributesNotUnique < Error
+    def message
+      "Custom authentication strategy attribute is not unique."
     end
   end
+
+  def self.configure(&block)
+    yield(self.conf)
+  end
+
+  def self.conf
+    @configuration ||= Configuration.new
+  end
+
+  class Configuration
+    attr_accessor :permanent, :expires, :expiration_time
+
+    def initialize
+      @permanent       = false
+      @expires         = 20.years
+      @expiration_time = 2.hours
+    end
+  end
+
 end
