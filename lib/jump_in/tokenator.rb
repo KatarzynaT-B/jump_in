@@ -5,7 +5,8 @@ module JumpIn
     DELIMITER = '.'.freeze
 
     def generate_token
-      Base64.urlsafe_encode64 [SecureRandom.hex(12), Time.now.xmlschema].join(DELIMITER)
+      Base64.urlsafe_encode64 [SecureRandom.hex(12), Time.now.xmlschema]
+        .join(DELIMITER)
     end
 
     def decode_and_split_token(token)

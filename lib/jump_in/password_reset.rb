@@ -4,7 +4,7 @@ module JumpIn
   module PasswordReset
     include JumpIn::Tokenator
 
-# CREATING TOKEN
+    # CREATING TOKEN
     def set_password_reset_for(user:, token: nil)
       if token_uniq_or_empty?(user: user, token: token)
         set_token(user: user, token: token)
@@ -33,17 +33,18 @@ module JumpIn
       !user.class.where(password_reset_token: token).exists?
     end
 
-# RECEIVING TOKEN
+    # RECEIVING TOKEN
     def password_reset_valid?(password_reset_token:)
       decode_time(password_reset_token) > Time.now - JumpIn.conf.expiration_time
     end
 
-    def update_password_for(user:, password:, password_confirmation:, password_reset_token:)
-      if token_correct?(user_token: user.password_reset_token, received_token: password_reset_token)
-        user.update_attributes(password: password, password_confirmation: password_confirmation, password_reset_token: nil)
-      else
-        false
-      end
+    def update_password_for(user:, password:, password_confirmation:,
+                            password_reset_token:)
+      return false unless token_correct?(user_token: user.password_reset_token,
+                                         received_token: password_reset_token)
+      user.update_attributes(password: password,
+                             password_confirmation: password_confirmation,
+                             password_reset_token: nil)
     end
 
     def token_correct?(user_token:, received_token:)

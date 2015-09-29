@@ -11,10 +11,9 @@ module JumpIn
         end
 
         def set_user_session(user:)
-          unless JumpIn.conf.permanent
-            session[:jump_in_class] = user.class.to_s
-            session[:jump_in_id]    = user.id
-          end
+          return nil if JumpIn.conf.permanent
+          session[:jump_in_class] = user.class.to_s
+          session[:jump_in_id]    = user.id
         end
 
         def remove_user_session
@@ -23,12 +22,9 @@ module JumpIn
         end
 
         def current_user_from_session
-          if session[:jump_in_id] && session[:jump_in_class]
-            klass = session[:jump_in_class].constantize
-            klass.find_by(id: session[:jump_in_id])
-          else
-            nil
-          end
+          return nil unless session[:jump_in_id] && session[:jump_in_class]
+          klass = session[:jump_in_class].constantize
+          klass.find_by(id: session[:jump_in_id])
         end
       end
     end

@@ -1,5 +1,4 @@
 JumpIn.configure do |config|
-
   # AUTHENTICATION
 
   # for `permanent` set to

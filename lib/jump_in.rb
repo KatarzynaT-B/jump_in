@@ -1,4 +1,4 @@
-require "jump_in/version"
+require 'jump_in/version'
 require 'jump_in/authentication'
 require 'jump_in/authentication/session'
 require 'jump_in/authentication/cookies'
@@ -6,8 +6,8 @@ require 'jump_in/strategies'
 require 'jump_in/password_reset'
 require 'jump_in/tokenator'
 
+# JumpIn top-level module
 module JumpIn
-
   class Error < StandardError
     def initialize
       super(message)
@@ -16,24 +16,24 @@ module JumpIn
 
   class InvalidTokenError < Error
     def message
-      "Invalid token passed."
+      'Invalid token passed.'
     end
   end
 
   class AuthenticationStrategyError < Error
     def message
-      "No authentication strategy detected."
+      'No authentication strategy detected.'
     end
   end
 
   class AttributesNotUnique < Error
     def message
-      "Custom authentication strategy attribute is not unique."
+      'Custom authentication strategy attribute is not unique.'
     end
   end
 
   def self.configure(&block)
-    yield(self.conf)
+    yield(conf)
   end
 
   def self.conf
@@ -49,5 +49,4 @@ module JumpIn
       @expiration_time = 2.hours
     end
   end
-
 end
