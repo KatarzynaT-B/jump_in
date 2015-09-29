@@ -13,14 +13,14 @@ module JumpIn
       def self.has_unique_attributes(unique_attributes)
         unique_attributes.sort!
         if DETECTABLE_ATTRIBUTES.values.include?(unique_attributes)
-          STRATEGIES.delete(self.name.constantize)
-          raise JumpIn::AttributesNotUnique
+          STRATEGIES.delete(name.constantize)
+          fail JumpIn::AttributesNotUnique
         end
-        DETECTABLE_ATTRIBUTES[self.name.constantize] = unique_attributes
+        DETECTABLE_ATTRIBUTES[name.constantize] = unique_attributes
       end
 
       def self.detected?(auth_params)
-        auth_params.keys.sort == DETECTABLE_ATTRIBUTES[self.name.constantize]
+        auth_params.keys.sort == DETECTABLE_ATTRIBUTES[name.constantize]
       end
 
       def initialize(user:, auth_params:)

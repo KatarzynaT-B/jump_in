@@ -11,11 +11,11 @@ module JumpIn
         end
 
         def set_user_cookies(user:)
-          if JumpIn.conf.permanent
-            expires = (JumpIn.conf.expires || 20.years).from_now
-            cookies.signed[:jump_in_class] = { value: user.class.to_s, expires: expires }
-            cookies.signed[:jump_in_id]    = { value: user.id, expires: expires }
-          end
+          return nil unless JumpIn.conf.permanent
+          expires = (JumpIn.conf.expires || 20.years).from_now
+          cookies.signed[:jump_in_class] = { value: user.class.to_s,
+                                             expires: expires }
+          cookies.signed[:jump_in_id]    = { value: user.id, expires: expires }
         end
 
         def remove_user_cookies
@@ -24,12 +24,10 @@ module JumpIn
         end
 
         def current_user_from_cookies
-          if cookies.signed[:jump_in_id] && cookies.signed[:jump_in_class]
-            klass = cookies.signed[:jump_in_class].constantize
-            klass.find_by(id: cookies.signed[:jump_in_id])
-          else
-            nil
-          end
+          return nil unless cookies.signed[:jump_in_id] &&
+                            cookies.signed[:jump_in_class]
+          klass = cookies.signed[:jump_in_class].constantize
+          klass.find_by(id: cookies.signed[:jump_in_id])
         end
       end
     end
