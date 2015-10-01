@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jump_in (0.0.2)
+    jump_in (0.0.3)
 
 GEM
   remote: https://rubygems.org/

@@ -5,7 +5,6 @@ require 'jump_in/authentication/cookies'
 require 'jump_in/strategies'
 require 'jump_in/password_reset'
 require 'jump_in/tokenator'
-
 # JumpIn top-level module
 module JumpIn
   class Error < StandardError
