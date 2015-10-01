@@ -1,7 +1,9 @@
 require_relative '../spec_helper'
-
-class AuthenticationController < ActionController::Base
+class AppMainController < ActionController::Base
   include JumpIn::Authentication
+end
+
+class AuthenticationController < AppMainController
   jumpin_use persistence: [:session, :cookies]
 end
 
@@ -13,7 +15,10 @@ describe AuthenticationController, type: :controller do
     it "it added default constants while including Session & Cookies" do
       expect(subject.class.constants).to include(:ON_LOGIN)
       expect(subject.class.constants).to include(:ON_LOGOUT)
-      expect(subject.class.constants).to include(:GET_CURRENT_USER)
+    end
+
+    it "it adds GET_CURRENT_USER to ApplicationController" do
+      expect(AppMainController.constants).to include(:GET_CURRENT_USER)
     end
 
     it "creates constant with method if constant didn't exist" do

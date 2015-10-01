@@ -7,6 +7,7 @@ module JumpIn
       base.extend(ClassMethods)
       base.send :helper_method, :current_user, :logged_in? if
         base.respond_to? :helper_method
+      const_set('APP_MAIN_CONTROLLER', base)
     end
 
     # LOGGING IN
@@ -55,12 +56,20 @@ module JumpIn
     # CLASS METHODS
 
     module ClassMethods
-      def jumpin_callback(callback, method_to_be_called)
+      def jumpin_callback(callback, jumpin_method)
+        if callback == :get_current_user
+          APP_MAIN_CONTROLLER.jumpin_callback_set(callback, jumpin_method)
+        else
+          jumpin_callback_set(callback, jumpin_method)
+        end
+      end
+
+      def jumpin_callback_set(callback, jumpin_method)
         jumpin_constant = callback.upcase
         unless constants.include?(jumpin_constant)
           const_set(jumpin_constant, [])
         end
-        const_get(jumpin_constant) << method_to_be_called
+        const_get(jumpin_constant) << jumpin_method
       end
 
       def jumpin_use(persistence:)
@@ -77,7 +86,7 @@ module JumpIn
 
     def get_current_user
       current_user = nil
-      self.class::GET_CURRENT_USER.each do |current_user_finder|
+      self.class.const_get(:GET_CURRENT_USER).each do |current_user_finder|
         current_user = send(current_user_finder)
         break if current_user
       end
