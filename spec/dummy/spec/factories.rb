@@ -6,4 +6,6 @@ FactoryGirl.define do
     name "User"
   end
 
+  factory :user do
+  end
 end

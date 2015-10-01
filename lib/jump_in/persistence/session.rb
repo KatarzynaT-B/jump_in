@@ -7,14 +7,6 @@ module JumpIn
         klass.jumpin_callback :on_login,         :set_user_session
         klass.jumpin_callback :on_logout,        :remove_user_session
         klass.jumpin_callback :get_current_user, :current_user_from_session
-
-        APP_MAIN_CONTROLLER.class_eval do
-          def current_user_from_session
-            return nil unless session[:jump_in_id] && session[:jump_in_class]
-            klass = session[:jump_in_class].constantize
-            klass.find_by(id: session[:jump_in_id])
-          end
-        end
       end
 
       def set_user_session(user:)
@@ -26,6 +18,12 @@ module JumpIn
       def remove_user_session
         session.delete :jump_in_class
         session.delete :jump_in_id
+      end
+
+      def current_user_from_session
+        return nil unless session[:jump_in_id] && session[:jump_in_class]
+        klass = session[:jump_in_class].constantize
+        klass.find_by(id: session[:jump_in_id])
       end
     end
   end

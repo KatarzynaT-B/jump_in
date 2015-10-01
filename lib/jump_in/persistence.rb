@@ -1,2 +1,2 @@
-require 'jump_in/authentication/session'
-require 'jump_in/authentication/cookies'
+require 'jump_in/persistence/session'
+require 'jump_in/persistence/cookies'

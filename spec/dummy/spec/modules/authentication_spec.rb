@@ -1,10 +1,20 @@
 require_relative '../spec_helper'
+
+module JumpIn::Strategies::Custom
+  def self.included(klass)
+    klass.jumpin_callback :get_authenticated_user, :user_from_custom
+  end
+
+  def user_from_custom(user:, auth_params:)
+  end
+end
+
 class AppMainController < ActionController::Base
   include JumpIn::Authentication
 end
 
 class AuthenticationController < AppMainController
-  jumpin_use persistence: [:session, :cookies]
+  jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
 end
 
 describe AuthenticationController, type: :controller do
@@ -12,24 +22,40 @@ describe AuthenticationController, type: :controller do
   after(:all) { JumpIn.instance_variable_set('@configuration', nil) }
 
   context ".jumpin_callback" do
-    it "it added default constants while including Session & Cookies" do
-      expect(subject.class.constants).to include(:ON_LOGIN)
-      expect(subject.class.constants).to include(:ON_LOGOUT)
+    context 'persistence' do
+      it "it adds default constants while including Session & Cookies" do
+        expect(subject.class.constants).to include(:ON_LOGIN)
+        expect(subject.class.constants).to include(:ON_LOGOUT)
+      end
+
+      it "it adds GET_CURRENT_USER to ApplicationController" do
+        expect(AppMainController.constants).to include(:GET_CURRENT_USER)
+      end
+
+      it "creates constant with method if constant didn't exist" do
+        subject.class.jumpin_callback :a_callback, :method
+        expect(subject.class.const_get(:A_CALLBACK)).to eq([:method])
+      end
+
+      it 'adds method if constant existed' do
+        subject.class.const_set('B_CALLBACK', [:method_1])
+        subject.class.jumpin_callback :b_callback, :method_2
+        expect(subject.class.const_get(:B_CALLBACK)).to eq([:method_1, :method_2])
+      end
     end
 
-    it "it adds GET_CURRENT_USER to ApplicationController" do
-      expect(AppMainController.constants).to include(:GET_CURRENT_USER)
-    end
+    context 'strategies' do
+      it 'adds default constant' do
+        expect(subject.class.constants).to include(:GET_AUTHENTICATED_USER)
+      end
 
-    it "creates constant with method if constant didn't exist" do
-      subject.class.jumpin_callback :a_callback, :method
-      expect(subject.class.const_get(:A_CALLBACK)).to eq([:method])
-    end
+      it 'adds authentication method from default strategy' do
+        expect(subject.class.const_get(:GET_AUTHENTICATED_USER)).to include(:user_from_password)
+      end
 
-    it 'adds method if constant existed' do
-      subject.class.const_set('B_CALLBACK', [:method_1])
-      subject.class.jumpin_callback :b_callback, :method_2
-      expect(subject.class.const_get(:B_CALLBACK)).to eq([:method_1, :method_2])
+      it 'adds authentication method from custom strategy' do
+        expect(subject.class.const_get(:GET_AUTHENTICATED_USER)).to include(:user_from_custom)
+      end
     end
   end
 
@@ -39,28 +65,27 @@ describe AuthenticationController, type: :controller do
       expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(false)
     end
 
-    it "calls detect_strategy with proper params" do
-      allow_to_receive_logged_in_and_return(false)
-      expect(subject).to receive(:detected_strategy).with(user: user_wsp, auth_params: { password: user_wsp.password }).
-        exactly(1).times.and_return(JumpIn::Strategies::ByPassword.new(user: user_wsp, auth_params: { password: user_wsp.password }))
-      subject.jump_in(user: user_wsp, password: user_wsp.password)
-    end
-
-    it "raises an error when no strategy detected" do
-      allow_to_receive_logged_in_and_return(false)
-      expect { subject.jump_in(user: user_wsp) }.to raise_error(JumpIn::AuthenticationStrategyError, "No authentication strategy detected.")
-    end
-
     it "returns false if user not logged_in and wrong login data provided" do
       allow_to_receive_logged_in_and_return(false)
-      expect(subject.jump_in(user: user_wsp, password:'something')).to eq(false)
+      allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: 'something'})
+      expect(subject.jump_in(user: user_wsp, password: 'something')).to eq(false)
     end
 
     context 'when user not logged_in and authentication successful' do
       it "returns true" do
         allow_to_receive_logged_in_and_return(false)
+        allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: user_wsp.password}).and_return(user_wsp)
         allow(subject).to receive(:login).with(user: user_wsp).and_return(true)
         expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
+      end
+    end
+
+    context 'custom strategy' do
+      let(:user) { FactoryGirl.create(:user) }
+      it 'calls custom strategy with passed param' do
+        allow_to_receive_logged_in_and_return(false)
+        expect(subject).to receive(:user_from_custom).with(user: user, auth_params: {is_fine: true})
+        subject.jump_in(user: user, is_fine: true)
       end
     end
   end
