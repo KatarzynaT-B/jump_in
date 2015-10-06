@@ -8,7 +8,7 @@ module JumpIn
       base.send :helper_method, :current_user, :logged_in? if
         base.respond_to? :helper_method
       base.const_set('GET_CURRENT_USER', [])
-      const_set('APP_MAIN_CONTROLLER', base)
+      const_set('JUMPIN_CONTROLLER', base)
     end
 
     # LOGGING IN

@@ -7,7 +7,7 @@ module JumpIn
         klass.jumpin_callback :on_login,         :set_user_cookies
         klass.jumpin_callback :on_logout,        :remove_user_cookies
         klass.jumpin_callback :get_current_user, :current_user_from_cookies
-        klass::APP_MAIN_CONTROLLER.class_eval do
+        klass::JUMPIN_CONTROLLER.class_eval do
           def current_user_from_cookies
             return nil unless cookies.signed[:jump_in_id] &&
                               cookies.signed[:jump_in_class]
