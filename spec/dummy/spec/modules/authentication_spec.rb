@@ -21,14 +21,20 @@ describe AuthenticationController, type: :controller do
   let(:user_wsp) { FactoryGirl.create(:user_with_secure_password) }
   after(:all) { JumpIn.instance_variable_set('@configuration', nil) }
 
+  context 'JUMPIN_CONTROLLER' do
+    it 'is available in current controller' do
+      expect(subject.class::JUMPIN_CONTROLLER).to eq(AppMainController)
+    end
+  end
+
   context ".jumpin_callback" do
     context 'persistence' do
-      it "it adds default constants while including Session & Cookies" do
+      it "adds default constants while including Session & Cookies" do
         expect(subject.class.constants).to include(:ON_LOGIN)
         expect(subject.class.constants).to include(:ON_LOGOUT)
       end
 
-      it "it adds GET_CURRENT_USER to ApplicationController" do
+      it "adds GET_CURRENT_USER to ApplicationController" do
         expect(AppMainController.constants).to include(:GET_CURRENT_USER)
       end
 
