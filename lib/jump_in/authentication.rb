@@ -13,17 +13,9 @@ module JumpIn
 
     # LOGGING IN
     def jump_in(user:, **auth_params)
-      if !logged_in? && authenticate_by_strategy(user: user,
-                                                 auth_params: auth_params)
-        login(user: user)
-      else
-        return false
-      end
-    end
-
-    def authenticate_by_strategy(user:, auth_params:)
-      if strategy = detected_strategy(user: user, auth_params: auth_params)
-        strategy.authenticate_user
+      if !logged_in? && (authenticated_user = get_authenticated_user(user: user,
+                                                      auth_params: auth_params))
+        login(user: authenticated_user)
       else
         false
       end
@@ -65,10 +57,13 @@ module JumpIn
         const_get(jumpin_constant) << jumpin_method
       end
 
-      def jumpin_use(persistence:)
-        persistence.each do |symbol|
-          include(JumpIn::Authentication::Persistence
-            .const_get(symbol.capitalize))
+      def jumpin_use(persistence:, strategies:)
+        modules_hash = { JumpIn::Persistence => persistence,
+                         JumpIn::Strategies  => strategies }
+        modules_hash.keys.each do |top_module|
+          modules_hash[top_module].each do |module_to_include|
+            include top_module.const_get(module_to_include.to_s.camelcase)
+          end
         end
       end
     end
@@ -86,13 +81,13 @@ module JumpIn
       current_user
     end
 
-    def detected_strategy(user:, auth_params:)
-      if the_strategy = JumpIn::Strategies::Base::STRATEGIES
-                        .detect { |strategy| strategy.detected?(auth_params) }
-        the_strategy.new(user: user, auth_params: auth_params)
-      else
-        fail JumpIn::AuthenticationStrategyError
+    def get_authenticated_user(user:, auth_params:)
+      authenticated_user = nil
+      self.class::GET_AUTHENTICATED_USER.each do |authenticate|
+        authenticated_user = self.send(authenticate, user: user, auth_params: auth_params)
+        break if authenticated_user
       end
+      authenticated_user
     end
   end
 end
