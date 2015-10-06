@@ -8,4 +8,9 @@ FactoryGirl.define do
 
   factory :user do
   end
+
+  factory :user_with_token do
+    token "such_a_long_token"
+  end
+
 end

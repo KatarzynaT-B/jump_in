@@ -14,7 +14,8 @@ class AppMainController < ActionController::Base
 end
 
 class AuthenticationController < AppMainController
-  jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
+  jumpin_use persistence: [:session, :cookies],
+             strategies: [:by_password, :by_token, :custom]
 end
 
 describe AuthenticationController, type: :controller do
@@ -66,32 +67,55 @@ describe AuthenticationController, type: :controller do
   end
 
   context "#jump_in" do
-    it "returns false if user logged_in" do
-      allow_to_receive_logged_in_and_return(true)
-      expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(false)
-    end
-
-    it "returns false if user not logged_in and wrong login data provided" do
-      allow_to_receive_logged_in_and_return(false)
-      allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: 'something'})
-      expect(subject.jump_in(user: user_wsp, password: 'something')).to eq(false)
-    end
-
-    context 'when user not logged_in and authentication successful' do
-      it "returns true" do
-        allow_to_receive_logged_in_and_return(false)
-        allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: user_wsp.password}).and_return(user_wsp)
-        allow(subject).to receive(:login).with(user: user_wsp).and_return(true)
-        expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
+    context 'when user logged in' do
+      it "returns false" do
+        allow_to_receive_logged_in_and_return(true)
+        expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(false)
       end
     end
 
-    context 'custom strategy' do
-      let(:user) { FactoryGirl.create(:user) }
-      it 'calls custom strategy with passed param' do
-        allow_to_receive_logged_in_and_return(false)
-        expect(subject).to receive(:user_from_custom).with(user: user, auth_params: {is_fine: true})
-        subject.jump_in(user: user, is_fine: true)
+    context 'when user not logged_in' do
+      before(:each) { allow_to_receive_logged_in_and_return(false) }
+
+      context 'ByPassword strategy' do
+        it 'calls :user_from_password with correct params' do
+          expect(subject).to receive(:user_from_password).with(user: user_wsp, auth_params: {password: 'password'})
+          subject.jump_in(user: user_wsp, password: 'password')
+        end
+
+        it "returns false if wrong password passed" do
+          allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: 'something'})
+          expect(subject.jump_in(user: user_wsp, password: 'something')).to eq(false)
+        end
+
+        it "returns true if correct password passed" do
+          allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: user_wsp.password}).and_return(user_wsp)
+          expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
+        end
+      end
+
+      context 'ByToken strategy' do
+        let(:user_wt) { FactoryGirl.create(:user_with_token) }
+        it 'calls :user_from_token with correct params' do
+          expect(subject).to receive(:user_from_token).with(user: user_wt, auth_params: {token: 'token'})
+          subject.jump_in(user: user_wt, token: 'token')
+        end
+
+        it 'returns false if authentication failed' do
+          expect(subject.jump_in(user: user_wt, token: 'token')).to eq(false)
+        end
+
+        it 'returns true if authentication successfull' do
+          expect(subject.jump_in(user: user_wt, token: user_wt.token)).to eq(true)
+        end
+      end
+
+      context 'custom strategy' do
+        let(:user) { FactoryGirl.create(:user) }
+        it 'calls custom strategy with passed param' do
+          expect(subject).to receive(:user_from_custom).with(user: user, auth_params: {is_fine: true})
+          subject.jump_in(user: user, is_fine: true)
+        end
       end
     end
   end
