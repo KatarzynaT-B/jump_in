@@ -141,25 +141,57 @@ end
 Don't forget to specify the custom module in your app's controller (`jumpin_use persistence: [:you_module_name]`).
 
 ### Authentication Strategies
-At the moment JumpIn provides one strategy: `ByPassword`. Strategy `ByOmniAuth` is in progress, strategy `ByToken` is in our minds, other strategies are more then welcome to come from your suggestions!
+At the moment JumpIn provides two strategies: `ByPassword`, `ByToken`. Strategy `ByOmniAuth` is in progress, strategy `ByToken` is in our minds, other strategies are more then welcome to come from your suggestions!
 
 
 #### Authentication by password
-JumpIn authentication by password uses `has_secure_password`'s authenticate method. Therefore you need to add column `password_digest` to your model's tabel and add: `has_secure_password` in the model to be authenticated. For example:
+By default we suggest using `has_secure_password`'s authenticate method. In order to do that you need to add column `password_digest` to your model's tabel and add: `has_secure_password` in the model to be authenticated:
+```
+class YourController < ApplicationController
+  jumpin_use persistance: [...], strategies: [:by_password]
+end
+```
 ```
 class YourClassName < ActiveRecord::Base
   has_secure_password
 end
 ```
+TIP: You can define your own `authenticate` method using any `password`-like column from your model. It is important for the method to return `true` or `false`, e.g.:
+```
+class YourClassName < ActiveRecord::Base
+  def authenticate(received_password)
+    your_password_attribute == received_password # e.g.
+  end
+end
+```
+
 This strategy is being used when auth_params passed to `jump_in` or `authenticate_by_strategy` include `:password`, therefore you should use it this way:
 ```
 jump_in(user: @student, password: 'secretpassword')
 ```
 What you need to pass is the object and password received in `params`.
 
-If you only want to use the autentication method you should pass the password inside the hash: `auth_params`:
+If you doesn't need the `jump_in` method and want to use `autenticate_by_strategy` method directly, you should pass the password inside the hash: `auth_params`:
 ```
 authenticate_by_strategy(user: @student, auth_params: { password: 'secretpassword' })
+```
+
+
+#### Authentication by token
+```
+class YourController < ApplicationController
+  jumpin_use persistance: [...], strategies: [:by_token]
+end
+```
+This strategy is being used when auth_params passed to `jump_in` or `authenticate_by_strategy` equal `:token`, therefore you should use it this way:
+```
+jump_in(user: @student, token: 'secret_token')
+```
+What you need to pass is the object and `token`. It can be token received in `params` or token that you've decoded.
+
+If you only want to use the autentication method you should pass the token inside the hash: `auth_params`:
+```
+authenticate_by_strategy(user: @student, auth_params: { token: 'secret_token' })
 ```
 
 
@@ -179,20 +211,47 @@ end
 
 1. add custom `def authenticate(keyword_argument(s):)` method to the model to be authenticated.
 It must use keyword arguments. The set of the arguments should be unique in comparison to sets of arguments of the other existing strategies (list below);
-1. add new class iheriting by `JumpIn::Strategies::Base` and define:
-  - `has_unique_attributes` - array of attributes used by the abovementioned `authenticate` method, it will be used to autmatically choose authentication strategy of your preference.
-  - `authenticate_user` - that calls `@user.authenticate` with proper params.
+1. add new module `JumpIn::Strategies::YourCustomStrategyName` and define:
+  - `self.included(klass)` - `klass.jumpin_callback :get_authenticated_user, :your_method_name` will ensure your method is called durign the authentication process;
+  - `your_method_name` - that indicates params unique for your strategy here: `[:your_params_for_authentication]` and authenticates user in next line.
 ```
-class MyStrategy < JumpIn::Strategies::Base
-  has_unique_attributes [:my_attribute, :another_attribute]
+module JumpIn::Strategies::YourCustomStrategyName
+  def self.included(klass)
+    klass.jumpin_callback :get_authenticated_user, :your_method_name
+  end
 
-  def authenticate_user
-    @user.authenticate(...) ? true : false
+  def your_method_name(user:, auth_params:)
+    return nil unless auth_params.keys == [:your_params_for_authentication]
+    user.authenticate(...) ? user : nil
   end
 end
 ```
 List of the arguments taken by the existing default strategies:
-- `ByPassword`: [:password].
+- `ByPassword`: [:password],
+- `ByToken`: [:token].
+
+
+#### Combined strategies
+It is also possible (and very simple) to use many authentication strategies in the same time, by means of our `get_authenticated_user` method.
+You just need to indicate strategies fo your interest in `jumpin_use` method and call `get_authenticated_use` once per each strategy, for example:
+
+```
+YourController < ApplicationController
+  jumpin_use persistence: [...], strategies: [:by_password, :by_token, :custom]
+
+  def create
+    @student = Student.find(name: params[:name])
+    if !logged_in? &&
+          get_authenticated_user(user: @student, auth_hash: { password: params[:password] }) &&
+          get_authenticated_user(user: @student, auth_hash: { token: params[:token] }) &&
+          get_authenticated_user(user: @student, auth_hash: { custom_data: params[:custom_data] })
+      login(user: @student)
+    else
+      false
+    end
+    ...
+  end
+end
 
 ## Password Reset
 

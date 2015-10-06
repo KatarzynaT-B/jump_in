@@ -23,7 +23,7 @@ ActiveRecord::Schema.define(version: 20151006101955) do
   end
 
   create_table "user_with_tokens", force: :cascade do |t|
-    t.string "token"
+    t.string "jumpin_token"
   end
 
   create_table "users", force: :cascade do |t|

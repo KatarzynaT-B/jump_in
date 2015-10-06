@@ -95,7 +95,8 @@ describe AuthenticationController, type: :controller do
       end
 
       context 'ByToken strategy' do
-        let(:user_wt) { FactoryGirl.create(:user_with_token) }
+        let!(:user_wt) { FactoryGirl.create(:user_with_token) }
+
         it 'calls :user_from_token with correct params' do
           expect(subject).to receive(:user_from_token).with(user: user_wt, auth_params: {token: 'token'})
           subject.jump_in(user: user_wt, token: 'token')
@@ -106,12 +107,13 @@ describe AuthenticationController, type: :controller do
         end
 
         it 'returns true if authentication successfull' do
-          expect(subject.jump_in(user: user_wt, token: user_wt.token)).to eq(true)
+          expect(subject.jump_in(user: user_wt, token: user_wt.jumpin_token)).to eq(true)
         end
       end
 
       context 'custom strategy' do
         let(:user) { FactoryGirl.create(:user) }
+
         it 'calls custom strategy with passed param' do
           expect(subject).to receive(:user_from_custom).with(user: user, auth_params: {is_fine: true})
           subject.jump_in(user: user, is_fine: true)

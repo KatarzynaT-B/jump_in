@@ -10,7 +10,7 @@ FactoryGirl.define do
   end
 
   factory :user_with_token do
-    token "such_a_long_token"
+    jumpin_token "such_a_long_token"
   end
 
 end

@@ -21,6 +21,15 @@ module JumpIn
       end
     end
 
+    def get_authenticated_user(user:, auth_params:)
+      authenticated_user = nil
+      self.class::GET_AUTHENTICATED_USER.each do |authenticate|
+        authenticated_user = self.send(authenticate, user: user, auth_params: auth_params)
+        break if authenticated_user
+      end
+      authenticated_user
+    end
+
     def login(user:)
       self.class::ON_LOGIN.each do |on_login|
         send(on_login, user: user)
@@ -79,15 +88,6 @@ module JumpIn
         break if current_user
       end
       current_user
-    end
-
-    def get_authenticated_user(user:, auth_params:)
-      authenticated_user = nil
-      self.class::GET_AUTHENTICATED_USER.each do |authenticate|
-        authenticated_user = self.send(authenticate, user: user, auth_params: auth_params)
-        break if authenticated_user
-      end
-      authenticated_user
     end
   end
 end
