@@ -42,18 +42,24 @@ module JumpIn
 
     # CLASS METHODS
     module ClassMethods
-      def jumpin_callback(callback, jumpin_method)
-        jumpin_constant = callback.upcase
-        const_set(jumpin_constant, []) unless const_defined?(jumpin_constant)
-        const_get(jumpin_constant) << jumpin_method
-      end
-
       def jumpin_use(persistence:, strategies:)
         modules_hash = { JumpIn::Persistence => persistence,
                          JumpIn::Strategies  => strategies }
         modules_hash.each do |top_module, modules_list|
           modules_list.cycle(1) { |mod| include top_module.const_get(mod.to_s.camelcase) }
         end
+      end
+
+      def register_jumpin_callbacks(callbacks_hash)
+        callbacks_hash.each do |callback, jumpin_methods|
+          jumpin_methods.each { |method| jumpin_callback(callback, method) }
+        end
+      end
+
+      def jumpin_callback(callback, jumpin_method)
+        jumpin_constant = callback.upcase
+        const_set(jumpin_constant, []) unless const_defined?(jumpin_constant)
+        const_get(jumpin_constant) << jumpin_method
       end
     end
 

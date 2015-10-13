@@ -3,10 +3,12 @@ require 'jump_in/authentication'
 module JumpIn
   module Persistence
     module Session
+
       def self.included(klass)
-        klass.jumpin_callback :on_login,         :set_user_session
-        klass.jumpin_callback :on_logout,        :remove_user_session
-        klass.jumpin_callback :get_current_user, :current_user_from_session
+        klass.register_jumpin_callbacks(
+          { :on_login         => [:set_user_session],
+            :on_logout        => [:remove_user_session],
+            :get_current_user => [:current_user_from_session] } )
       end
 
       def set_user_session(user:)

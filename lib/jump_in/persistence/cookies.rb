@@ -4,9 +4,10 @@ module JumpIn
   module Persistence
     module Cookies
       def self.included(klass)
-        klass.jumpin_callback :on_login,         :set_user_cookies
-        klass.jumpin_callback :on_logout,        :remove_user_cookies
-        klass.jumpin_callback :get_current_user, :current_user_from_cookies
+        klass.register_jumpin_callbacks(
+          { :on_login         => [:set_user_cookies],
+            :on_logout        => [:remove_user_cookies],
+            :get_current_user => [:current_user_from_cookies] } )
       end
 
       def set_user_cookies(user:)
