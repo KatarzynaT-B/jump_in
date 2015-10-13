@@ -1,41 +1,67 @@
 require_relative '../spec_helper'
 
+### CUSTOM STRATEGY
 module JumpIn::Strategies::Custom
   def self.included(klass)
-    klass.jumpin_callback :get_authenticated_user, :user_from_custom
+    klass.register_jumpin_callbacks(
+      get_authenticated_user: [:user_from_custom])
   end
 
   def user_from_custom(user:, auth_params:)
   end
 end
+###
 
+### BASIC APP STRUCTURE
 class AppMainController < ActionController::Base
   include JumpIn::Authentication
+  jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
 end
 
 class AuthenticationController < AppMainController
-  jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
 end
+###
+
+### TWO GROUPS OF CONTROLLERS WITH DIFFERENT MODULES
+class CommonController < ActionController::Base
+  include JumpIn::Authentication
+end
+
+class GroupOneController < CommonController
+  jumpin_use persistence: [:session], strategies: [:by_password]
+end
+
+class GroupTwoController < CommonController
+  jumpin_use persistence: [:cookies], strategies: [:custom]
+end
+###
 
 describe AuthenticationController, type: :controller do
   let(:user_wsp) { FactoryGirl.create(:user_with_secure_password) }
   after(:all) { JumpIn.instance_variable_set('@configuration', nil) }
 
-  context 'JUMPIN_CONTROLLER' do
-    it 'is available in current controller' do
-      expect(subject.class::JUMPIN_CONTROLLER).to eq(AppMainController)
+  context '.jumpin_use' do
+    it 'adds persistence methods only to the controller that includes' do
+      expect(GroupOneController.new).to     respond_to(:current_user_from_session)
+      expect(GroupOneController.new).to_not respond_to(:current_user_from_cookies)
+      expect(GroupTwoController.new).to     respond_to(:current_user_from_cookies)
+      expect(GroupTwoController.new).to_not respond_to(:current_user_from_session)
+    end
+
+    it 'adds authentication methods only to the controller that includes' do
+      expect(GroupOneController.new).to     respond_to(:user_from_password)
+      expect(GroupOneController.new).to_not respond_to(:user_from_custom)
+      expect(GroupTwoController.new).to     respond_to(:user_from_custom)
+      expect(GroupTwoController.new).to_not respond_to(:user_from_password)
     end
   end
 
-  context ".jumpin_callback" do
+  context ".register_jumpin_callbacks" do
     context 'persistence' do
       it "adds default constants while including Session & Cookies" do
         expect(subject.class.constants).to include(:ON_LOGIN)
         expect(subject.class.constants).to include(:ON_LOGOUT)
-      end
-
-      it "adds GET_CURRENT_USER to ApplicationController" do
-        expect(AppMainController.constants).to include(:GET_CURRENT_USER)
+        expect(subject.class.constants).to include(:GET_CURRENT_USER)
       end
 
       it "creates constant with method if constant didn't exist" do
@@ -81,7 +107,7 @@ describe AuthenticationController, type: :controller do
       it "returns true" do
         allow_to_receive_logged_in_and_return(false)
         allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: user_wsp.password}).and_return(user_wsp)
-        allow(subject).to receive(:login).with(user: user_wsp).and_return(true)
+        allow(subject).to receive(:login).with(user: user_wsp, by_cookies: false).and_return(true)
         expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
       end
     end
@@ -97,14 +123,18 @@ describe AuthenticationController, type: :controller do
   end
 
   context "#login" do
-    it "sets session when @configuration.permanent is false" do
+    it "sets session when by_cookies not passed" do
       subject.login(user: user_wsp)
       expect_only_session_set_for(user_wsp)
     end
 
-    it "sets cookies when @configuration.permanent is true" do
-      run_config(permanent: true)
-      subject.login(user: user_wsp)
+    it "sets session when by_cookies passed as false" do
+      subject.login(user: user_wsp, by_cookies: false)
+      expect_only_session_set_for(user_wsp)
+    end
+
+    it "sets cookies when by_cookies passed as true" do
+      subject.login(user: user_wsp, by_cookies: true)
       expect_only_cookies_set_for(user_wsp)
     end
 
@@ -117,15 +147,14 @@ describe AuthenticationController, type: :controller do
       end
 
       it "sets 20 years if @configuration.expires not set" do
-        run_config(permanent: true)
-        subject.login(user: user_wsp)
+        subject.login(user: user_wsp, by_cookies:true)
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
       end
 
       it "sets correct value if @configuration.expires set" do
-        run_config(permanent: true, expires: 2.hours)
-        subject.login(user: user_wsp)
+        run_config(expires: 2.hours)
+        subject.login(user: user_wsp, by_cookies: true)
         expect(@cookies.signed[:jump_in_class][:expires]).to eq(@cookies.signed[:jump_in_id][:expires])
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)

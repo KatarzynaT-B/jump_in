@@ -5,7 +5,7 @@ require 'jump_in/password_reset'
 # JumpIn top-level module
 module JumpIn
   class Error < StandardError
-    def initialize
+    def initialize(message = nil)
       super(message)
     end
   end
@@ -22,10 +22,7 @@ module JumpIn
     end
   end
 
-  class AttributesNotUnique < Error
-    def message
-      'Custom authentication strategy attribute is not unique.'
-    end
+  class ConstUndefined < Error
   end
 
   def self.configure(&block)
@@ -37,10 +34,9 @@ module JumpIn
   end
 
   class Configuration
-    attr_accessor :permanent, :expires, :expiration_time
+    attr_accessor :expires, :expiration_time
 
     def initialize
-      @permanent       = false
       @expires         = 20.years
       @expiration_time = 2.hours
     end

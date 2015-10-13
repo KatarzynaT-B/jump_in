@@ -1,12 +1,6 @@
 JumpIn.configure do |config|
   # AUTHENTICATION
 
-  # for `permanent` set to
-  # - true - login method sets cookies,
-  # - false - login method sets session.
-
-  config.permanent = true
-
   # `expires` is used by login method only when `permanent` is set to true
   # It defines expiration time for cookies.
   # Default value is set to 20 years - as in cookies.permanent.
