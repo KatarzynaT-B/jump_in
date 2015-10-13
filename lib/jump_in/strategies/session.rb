@@ -1,7 +1,7 @@
 require 'jump_in/authentication'
 
 module JumpIn
-  module Persistence
+  module Strategies
     module Session
 
       def self.included(klass)

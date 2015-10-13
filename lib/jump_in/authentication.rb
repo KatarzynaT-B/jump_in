@@ -1,5 +1,4 @@
 require 'jump_in/strategies'
-require 'jump_in/persistence'
 
 module JumpIn
   module Authentication
@@ -44,11 +43,9 @@ module JumpIn
 
     # CLASS METHODS
     module ClassMethods
-      def jumpin_use(persistence:, strategies:)
-        modules_hash = { JumpIn::Persistence => persistence,
-                         JumpIn::Strategies  => strategies }
-        modules_hash.each do |top_module, modules_list|
-          modules_list.each { |mod| include top_module.const_get(mod.to_s.camelcase) }
+      def jumpin_use(*strategies)
+        strategies.flatten.each do |strategy|
+          include JumpIn::Strategies.const_get(strategy.to_s.camelcase)
         end
       end
 
