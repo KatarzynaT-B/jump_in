@@ -7,13 +7,4 @@ JumpIn.configure do |config|
   # You can uncomment the line below and change it.
 
   # config.expires = 20.years
-
-  # PASSWORD RESET
-
-  # `expiration_time` is used by PasswordReset#password_reset_valid?
-  # to verify whether password_reset_token is still valid.
-  # Default value is set to 2 hours.
-  # You can uncomment the line below and change it.
-
-  # config.expiration_time = 2.hours
 end
