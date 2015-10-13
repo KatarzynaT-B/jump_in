@@ -10,17 +10,19 @@ module JumpIn
     end
 
     # LOGGING IN
-    def jump_in(user:, **auth_params)
+    def jump_in(user:, by_cookies:false, **auth_params)
       if !logged_in? && (authenticated_user = get_authenticated_user(user: user,
                                                       auth_params: auth_params))
-        login(user: authenticated_user)
+        login(user: authenticated_user, by_cookies:false)
       else
         false
       end
     end
 
-    def login(user:)
-      self.class::ON_LOGIN.each {|on_login| send(on_login, user: user) }
+    def login(user:, by_cookies:false)
+      self.class::ON_LOGIN.each do |on_login|
+        send(on_login, user: user, by_cookies: by_cookies)
+      end
       true
     end
 

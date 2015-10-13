@@ -11,8 +11,8 @@ module JumpIn
           get_current_user: [:current_user_from_session] )
       end
 
-      def set_user_session(user:)
-        return nil if JumpIn.conf.permanent
+      def set_user_session(user:, by_cookies:)
+        return nil if by_cookies
         session[:jump_in_class] = user.class.to_s
         session[:jump_in_id]    = user.id
       end

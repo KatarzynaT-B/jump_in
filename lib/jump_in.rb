@@ -34,10 +34,9 @@ module JumpIn
   end
 
   class Configuration
-    attr_accessor :permanent, :expires, :expiration_time
+    attr_accessor :expires, :expiration_time
 
     def initialize
-      @permanent       = false
       @expires         = 20.years
       @expiration_time = 2.hours
     end

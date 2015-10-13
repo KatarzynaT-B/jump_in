@@ -73,7 +73,7 @@ describe AuthenticationController, type: :controller do
       it "returns true" do
         allow_to_receive_logged_in_and_return(false)
         allow(subject).to receive(:authenticate_by_password).with(user: user_wsp, auth_params: {password: user_wsp.password}).and_return(user_wsp)
-        allow(subject).to receive(:login).with(user: user_wsp).and_return(true)
+        allow(subject).to receive(:login).with(user: user_wsp, by_cookies: false).and_return(true)
         expect(subject.jump_in(user: user_wsp, password: user_wsp.password)).to eq(true)
       end
     end
@@ -89,14 +89,18 @@ describe AuthenticationController, type: :controller do
   end
 
   context "#login" do
-    it "sets session when @configuration.permanent is false" do
+    it "sets session when by_cookies not passed" do
       subject.login(user: user_wsp)
       expect_only_session_set_for(user_wsp)
     end
 
-    it "sets cookies when @configuration.permanent is true" do
-      run_config(permanent: true)
-      subject.login(user: user_wsp)
+    it "sets session when by_cookies passed as false" do
+      subject.login(user: user_wsp, by_cookies: false)
+      expect_only_session_set_for(user_wsp)
+    end
+
+    it "sets cookies when by_cookies passed as true" do
+      subject.login(user: user_wsp, by_cookies: true)
       expect_only_cookies_set_for(user_wsp)
     end
 
@@ -109,15 +113,14 @@ describe AuthenticationController, type: :controller do
       end
 
       it "sets 20 years if @configuration.expires not set" do
-        run_config(permanent: true)
-        subject.login(user: user_wsp)
+        subject.login(user: user_wsp, by_cookies:true)
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 19.years, Time.now + 21.years)
       end
 
       it "sets correct value if @configuration.expires set" do
-        run_config(permanent: true, expires: 2.hours)
-        subject.login(user: user_wsp)
+        run_config(expires: 2.hours)
+        subject.login(user: user_wsp, by_cookies: true)
         expect(@cookies.signed[:jump_in_class][:expires]).to eq(@cookies.signed[:jump_in_id][:expires])
         expect(@cookies.signed[:jump_in_class][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)
         expect(@cookies.signed[:jump_in_id][:expires]).to be_between(Time.now + 1.hours, Time.now + 3.hours)

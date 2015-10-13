@@ -1,7 +1,6 @@
 
-def run_config(permanent: false, expires: 20.years, expiration_time: 2.hours)
+def run_config(expires: 20.years, expiration_time: 2.hours)
   JumpIn.configure do |config|
-    config.permanent = permanent
     config.expires = expires
     config.expiration_time = expiration_time
   end
