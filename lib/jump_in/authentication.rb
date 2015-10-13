@@ -46,11 +46,11 @@ module JumpIn
         modules_hash = { JumpIn::Persistence => persistence,
                          JumpIn::Strategies  => strategies }
         modules_hash.each do |top_module, modules_list|
-          modules_list.cycle(1) { |mod| include top_module.const_get(mod.to_s.camelcase) }
+          modules_list.each { |mod| include top_module.const_get(mod.to_s.camelcase) }
         end
       end
 
-      def register_jumpin_callbacks(callbacks_hash)
+      def register_jumpin_callbacks(**callbacks_hash)
         callbacks_hash.each do |callback, jumpin_methods|
           jumpin_methods.each { |method| jumpin_callback(callback, method) }
         end

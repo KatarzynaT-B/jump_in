@@ -6,9 +6,9 @@ module JumpIn
 
       def self.included(klass)
         klass.register_jumpin_callbacks(
-          { :on_login         => [:set_user_session],
-            :on_logout        => [:remove_user_session],
-            :get_current_user => [:current_user_from_session] } )
+          on_login:         [:set_user_session],
+          on_logout:        [:remove_user_session],
+          get_current_user: [:current_user_from_session] )
       end
 
       def set_user_session(user:)
