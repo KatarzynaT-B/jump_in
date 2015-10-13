@@ -2,7 +2,8 @@ require_relative '../spec_helper'
 
 module JumpIn::Strategies::Custom
   def self.included(klass)
-    klass.jumpin_callback :get_authenticated_user, :user_from_custom
+    klass.register_jumpin_callbacks(
+      get_authenticated_user: [:user_from_custom])
   end
 
   def user_from_custom(user:, auth_params:)
