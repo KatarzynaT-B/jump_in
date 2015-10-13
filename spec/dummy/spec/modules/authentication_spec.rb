@@ -1,5 +1,6 @@
 require_relative '../spec_helper'
 
+### CUSTOM STRATEGY
 module JumpIn::Strategies::Custom
   def self.included(klass)
     klass.register_jumpin_callbacks(
@@ -9,21 +10,53 @@ module JumpIn::Strategies::Custom
   def user_from_custom(user:, auth_params:)
   end
 end
+###
 
+### BASIC APP STRUCTURE
 class AppMainController < ActionController::Base
   include JumpIn::Authentication
   jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
 end
 
 class AuthenticationController < AppMainController
-  # jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
 end
+###
+
+### TWO GROUPS OF CONTROLLERS WITH DIFFERENT MODULES
+class CommonController < ActionController::Base
+  include JumpIn::Authentication
+end
+
+class GroupOneController < CommonController
+  jumpin_use persistence: [:session], strategies: [:by_password]
+end
+
+class GroupTwoController < CommonController
+  jumpin_use persistence: [:cookies], strategies: [:custom]
+end
+###
 
 describe AuthenticationController, type: :controller do
   let(:user_wsp) { FactoryGirl.create(:user_with_secure_password) }
   after(:all) { JumpIn.instance_variable_set('@configuration', nil) }
 
-  context ".jumpin_callback" do
+  context '.jumpin_use' do
+    it 'adds persistence methods only to the controller that includes' do
+      expect(GroupOneController.new).to     respond_to(:current_user_from_session)
+      expect(GroupOneController.new).to_not respond_to(:current_user_from_cookies)
+      expect(GroupTwoController.new).to     respond_to(:current_user_from_cookies)
+      expect(GroupTwoController.new).to_not respond_to(:current_user_from_session)
+    end
+
+    it 'adds authentication methods only to the controller that includes' do
+      expect(GroupOneController.new).to     respond_to(:user_from_password)
+      expect(GroupOneController.new).to_not respond_to(:user_from_custom)
+      expect(GroupTwoController.new).to     respond_to(:user_from_custom)
+      expect(GroupTwoController.new).to_not respond_to(:user_from_password)
+    end
+  end
+
+  context ".register_jumpin_callbacks" do
     context 'persistence' do
       it "adds default constants while including Session & Cookies" do
         expect(subject.class.constants).to include(:ON_LOGIN)
