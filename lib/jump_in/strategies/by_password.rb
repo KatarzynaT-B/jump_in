@@ -4,7 +4,8 @@ module JumpIn
   module Strategies
     module ByPassword
       def self.included(klass)
-        klass.jumpin_callback :get_authenticated_user, :user_from_password
+        klass.register_jumpin_callbacks(
+          get_authenticated_user: [:user_from_password])
       end
 
       def user_from_password(user:, auth_params:)
