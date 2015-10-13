@@ -61,26 +61,33 @@ module JumpIn
     private
 
     def get_current_user
-      (method = detect_current_user_method) ? send(method) : nil
+      unless self.class.const_defined?(:GET_CURRENT_USER)
+        fail JumpIn::ConstUndefined.new("'Undefined constant 'GET_CURRENT_USER' for #{self}")
+      end
+      detect_current_user
+    end
+
+    def detect_current_user
+      user = nil
+      self.class::GET_CURRENT_USER.detect do |tested_method|
+        user = send(tested_method)
+      end
+      user
     end
 
     def get_authenticated_user(user:, auth_params:)
-      method = detect_authenticate_method(user: user, auth_params: auth_params)
-      method ? send(method, user: user, auth_params: auth_params) : nil
+      unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
+        fail JumpIn::ConstUndefined.new("'Undefined constant 'GET_AUTHENTICATED_USER' for #{self}")
+      end
+      authenticated_user(user: user, auth_params: auth_params)
     end
 
-    def detect_current_user_method
-      if const_defined?(GET_CURRENT_USER)
-        self.class::GET_CURRENT_USER.detect { |tested_method| send(tested_method) }
+    def authenticated_user(user:, auth_params:)
+      auth_user = nil
+      self.class::GET_AUTHENTICATED_USER.detect do |tested_method|
+        auth_user = send(tested_method, user: user, auth_params: auth_params)
       end
-    end
-
-    def detect_authenticate_method(user:, auth_params:)
-      if const_defined?(GET_AUTHENTICATED_USER)
-        self.class::GET_AUTHENTICATED_USER.detect do |tested_method|
-          send(tested_method, user: user, auth_params: auth_params)
-        end
-      end
+      auth_user
     end
   end
 end
