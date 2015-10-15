@@ -18,6 +18,13 @@ module JumpIn
       end
     end
 
+    def get_authenticated_user(user:, auth_params:)
+      unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
+        fail JumpIn::ConstUndefined.new("Undefined constant 'GET_AUTHENTICATED_USER' for #{self}")
+      end
+      authenticated_user(user: user, auth_params: auth_params)
+    end
+
     def login(user:, by_cookies:false)
       self.class::ON_LOGIN.each do |on_login|
         send(on_login, user: user, by_cookies: by_cookies)
@@ -78,13 +85,6 @@ module JumpIn
         user = send(tested_method)
       end
       user
-    end
-
-    def get_authenticated_user(user:, auth_params:)
-      unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
-        fail JumpIn::ConstUndefined.new("'Undefined constant 'GET_AUTHENTICATED_USER' for #{self}")
-      end
-      authenticated_user(user: user, auth_params: auth_params)
     end
 
     def authenticated_user(user:, auth_params:)
