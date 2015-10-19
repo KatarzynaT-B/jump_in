@@ -1,7 +1,7 @@
 require 'jump_in/authentication'
 
 module JumpIn
-  module Persistence
+  module Strategies
     module Cookies
       def self.included(klass)
         klass.register_jumpin_callbacks(

@@ -41,23 +41,3 @@ end
 def allow_to_receive_logged_in_and_return(boolean)
   allow(subject).to receive(:logged_in?).and_return(boolean)
 end
-
-# module PasswordReset
-
-def receive_token_uniq_or_empty_and_return(user, token, boolean)
-  receive(:token_uniq_or_empty?).
-    with(user: user, token: token).exactly(1).times.
-    and_return(boolean)
-end
-
-def expect_set_token_and_return(user, token, boolean)
-  expect(subject).to receive(:set_token).
-    with(user: user, token: token).exactly(1).times.
-    and_return(true)
-end
-
-def allow_to_receive_token_correct_and_return(user, token, boolean)
-  allow(subject).to receive(:token_correct?).
-    with(user_token: user.password_reset_token, received_token: token).
-    and_return(boolean)
-end

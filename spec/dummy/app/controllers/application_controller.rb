@@ -4,5 +4,4 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   include JumpIn::Authentication
-  include JumpIn::PasswordReset
 end

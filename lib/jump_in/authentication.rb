@@ -1,5 +1,4 @@
 require 'jump_in/strategies'
-require 'jump_in/persistence'
 
 module JumpIn
   module Authentication
@@ -17,6 +16,13 @@ module JumpIn
       else
         false
       end
+    end
+
+    def get_authenticated_user(user:, auth_params:)
+      unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
+        fail JumpIn::ConstUndefined.new("Undefined constant 'GET_AUTHENTICATED_USER' for #{self}")
+      end
+      authenticated_user(user: user, auth_params: auth_params)
     end
 
     def login(user:, by_cookies:false)
@@ -44,11 +50,9 @@ module JumpIn
 
     # CLASS METHODS
     module ClassMethods
-      def jumpin_use(persistence:, strategies:)
-        modules_hash = { JumpIn::Persistence => persistence,
-                         JumpIn::Strategies  => strategies }
-        modules_hash.each do |top_module, modules_list|
-          modules_list.each { |mod| include top_module.const_get(mod.to_s.camelcase) }
+      def jumpin_use(*strategies)
+        strategies.flatten.each do |strategy|
+          include JumpIn::Strategies.const_get(strategy.to_s.camelcase)
         end
       end
 
@@ -81,13 +85,6 @@ module JumpIn
         user = send(tested_method)
       end
       user
-    end
-
-    def get_authenticated_user(user:, auth_params:)
-      unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
-        fail JumpIn::ConstUndefined.new("'Undefined constant 'GET_AUTHENTICATED_USER' for #{self}")
-      end
-      authenticated_user(user: user, auth_params: auth_params)
     end
 
     def authenticated_user(user:, auth_params:)

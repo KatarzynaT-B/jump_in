@@ -15,7 +15,7 @@ end
 ### BASIC APP STRUCTURE
 class AppMainController < ActionController::Base
   include JumpIn::Authentication
-  jumpin_use persistence: [:session, :cookies], strategies: [:by_password, :custom]
+  jumpin_use :session, :cookies, :by_password, :custom
 end
 
 class AuthenticationController < AppMainController
@@ -28,11 +28,11 @@ class CommonController < ActionController::Base
 end
 
 class GroupOneController < CommonController
-  jumpin_use persistence: [:session], strategies: [:by_password]
+  jumpin_use :session, :by_password
 end
 
 class GroupTwoController < CommonController
-  jumpin_use persistence: [:cookies], strategies: [:custom]
+  jumpin_use :cookies, :custom
 end
 ###
 
@@ -41,18 +41,11 @@ describe AuthenticationController, type: :controller do
   after(:all) { JumpIn.instance_variable_set('@configuration', nil) }
 
   context '.jumpin_use' do
-    it 'adds persistence methods only to the controller that includes' do
+    it 'adds proper methods only to the controller that includes' do
       expect(GroupOneController.new).to     respond_to(:current_user_from_session)
       expect(GroupOneController.new).to_not respond_to(:current_user_from_cookies)
       expect(GroupTwoController.new).to     respond_to(:current_user_from_cookies)
       expect(GroupTwoController.new).to_not respond_to(:current_user_from_session)
-    end
-
-    it 'adds authentication methods only to the controller that includes' do
-      expect(GroupOneController.new).to     respond_to(:user_from_password)
-      expect(GroupOneController.new).to_not respond_to(:user_from_custom)
-      expect(GroupTwoController.new).to     respond_to(:user_from_custom)
-      expect(GroupTwoController.new).to_not respond_to(:user_from_password)
     end
   end
 
