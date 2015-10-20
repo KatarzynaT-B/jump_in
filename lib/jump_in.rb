@@ -1,5 +1,5 @@
 require 'jump_in/version'
-require 'jump_in/authentication'
+require 'jump_in/jump_in'
 
 # JumpIn top-level module
 module JumpIn
