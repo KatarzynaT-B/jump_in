@@ -186,7 +186,12 @@ In order to use them you need to run generators and specify them in `jumpin_use`
 - `LastLoggedOut`: `$ rails generate jump_in:last_logged_out` - this strategy keeps track of last logout datetime for you,
 - `LoginsCounter`:`$ rails generate jump_in:logins_counter` - this strategy keeps count of user logging-in for you.
 
-The generators add files to `config/initializers/jump_in`, where you can uncomment the code, add required columns in your models and start using the modules.
+The generators add files to `lib/jump_in`, where you can uncomment the code, add required columns in your models and start using the modules.
+You also need to add one line to `config/application.rb`:
+```
+    config.autoload_paths += Dir["#{config.root}/lib"]
+```
+You can move the files to any other directory, but you'll have to explicitly include the modules in your controller instead of doing it by means of `jumpin_use` method.
 
 #### Custom
 If you want to add a custom authentication/on-login/on-logout/find-current-user method, you should place it inside `JumpIn::YourModuleName` module and add proper callbacks in `self.included(klass)` method, e.g.:
