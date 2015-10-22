@@ -6,7 +6,8 @@ module JumpIn::LastLoggedOut
       on_logout: [:keep_last_logout])
   end
 
-  def keep_last_logout(user:)
+  def keep_last_logout(opts:)
+    user = opts[:user]
     user.update_attribute('last_logout', Time.now)
   end
 end
@@ -51,7 +52,7 @@ describe LastLoggedOutController, type: :controller do
 
   context "#jump_out" do
     it 'calls LastLoggedIn strategy' do
-      expect(subject).to receive(:keep_last_logout).with(user: user)
+      expect(subject).to receive(:keep_last_logout).with(opts: { user: user } )
       subject.jump_out(user: user)
     end
 

@@ -10,7 +10,8 @@
 #       on_logout: [:keep_last_logout])
 #   end
 
-#   def keep_last_logout(user:)
+#   def keep_last_logout(opts:)
+#     user = opts[:user]
 #     user.update_attribute('last_logout', Time.now)
 #   end
 # end

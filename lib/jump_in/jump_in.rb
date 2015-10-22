@@ -36,8 +36,8 @@ module JumpIn
   end
 
   # LOGGING OUT
-  def jump_out(user: nil)
-    self.class::ON_LOGOUT.each { |on_logout| send(on_logout, user: user) }
+  def jump_out(**opts)
+    self.class::ON_LOGOUT.each { |on_logout| send(on_logout, opts: opts) }
     true
   end
 

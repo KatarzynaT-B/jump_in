@@ -9,13 +9,13 @@ module JumpIn
         get_current_user: [:current_user_from_session] )
     end
 
-    def set_user_session(user:, opts:)
+    def set_user_session(user:, opts:nil)
       return nil if opts[:by_cookies]
       session[:jump_in_class] = user.class.to_s
       session[:jump_in_id]    = user.id
     end
 
-    def remove_user_session(user: nil)
+    def remove_user_session(opts:nil)
       session.delete :jump_in_class
       session.delete :jump_in_id
     end
