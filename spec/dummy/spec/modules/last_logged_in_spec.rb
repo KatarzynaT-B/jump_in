@@ -6,7 +6,7 @@ module JumpIn::LastLoggedIn
       on_login: [:keep_last_login])
   end
 
-  def keep_last_login(user:, by_cookies:nil)
+  def keep_last_login(user:, opts:)
     user.update_attribute('last_login', Time.now)
   end
 end
@@ -15,12 +15,12 @@ class UserForLogin < ActiveRecord::Base
   has_secure_password
 end
 
-class ApplicationController < ActionController::Base
+class ApplicationController1 < ActionController::Base
   include JumpIn
   jumpin_use :session, :by_password, :last_logged_in
 end
 
-class LastLoggedInController < ApplicationController
+class LastLoggedInController < ApplicationController1
 end
 
 describe LastLoggedInController, type: :controller do
@@ -54,7 +54,7 @@ describe LastLoggedInController, type: :controller do
   context "#jump_in" do
     it 'calls LastLoggedIn strategy' do
       allow_to_receive_logged_in_and_return(false)
-      expect(subject).to receive(:keep_last_login).with(user: user, by_cookies: false)
+      expect(subject).to receive(:keep_last_login).with(user: user, opts: { by_cookies: false } )
       subject.jump_in(user: user, password: user.password)
     end
   end

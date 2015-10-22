@@ -104,6 +104,18 @@ describe AuthenticationController, type: :controller do
       expect(subject.authenticate_and_login(user: user_wsp, password: user_wsp.password)).to eq(false)
     end
 
+    it 'calls login with by_cookies:false by default' do
+      allow_to_receive_logged_in_and_return(false)
+      expect(subject).to receive(:login).with(user: user_wsp, by_cookies: false)
+      subject.jump_in(user: user_wsp, password: user_wsp.password)
+    end
+
+    it 'calls login with by_cookies:true if passed' do
+      allow_to_receive_logged_in_and_return(false)
+      expect(subject).to receive(:login).with(user: user_wsp, by_cookies: true)
+      subject.jump_in(user: user_wsp, password: user_wsp.password, by_cookies: true)
+    end
+
     context 'custom strategy' do
       let(:user) { FactoryGirl.create(:user) }
       it 'calls custom strategy with passed param' do

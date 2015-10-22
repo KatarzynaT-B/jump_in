@@ -9,8 +9,8 @@ module JumpIn
         get_current_user: [:current_user_from_cookies] )
     end
 
-    def set_user_cookies(user:, by_cookies:)
-      return nil unless by_cookies
+    def set_user_cookies(user:, opts:)
+      return nil unless opts[:by_cookies]
       expires = (JumpIn.conf.expires || 20.years).from_now
       cookies.signed[:jump_in_class] = { value: user.class.to_s,
                                          expires: expires }

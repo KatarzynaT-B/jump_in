@@ -10,16 +10,16 @@ module JumpIn
   end
 
   # LOGGING IN
-  def jump_in(user:, by_cookies:false, **auth_params)
+  def authenticate_and_login(user:, by_cookies:false, **auth_params)
     if !logged_in? && (authenticated_user = get_authenticated_user(user: user,
                                                     auth_params: auth_params))
-      login(user: authenticated_user, by_cookies:false)
+      login(user: authenticated_user, by_cookies: by_cookies)
     else
       false
     end
   end
 
-  alias :authenticate_and_login :jump_in
+  alias :jump_in :authenticate_and_login
 
   def get_authenticated_user(user:, auth_params: nil)
     unless self.class.const_defined?(:GET_AUTHENTICATED_USER)
@@ -28,9 +28,9 @@ module JumpIn
     authenticated_user(user: user, auth_params: auth_params)
   end
 
-  def login(user:, by_cookies:false)
+  def login(user:, **opts)
     self.class::ON_LOGIN.each do |on_login|
-      send(on_login, user: user, by_cookies: by_cookies)
+      send(on_login, user: user, opts: opts)
     end
     true
   end

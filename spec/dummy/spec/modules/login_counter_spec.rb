@@ -6,21 +6,21 @@ module JumpIn::LoginCounter
       on_login: [:count_logins])
   end
 
-  def count_logins(user:, by_cookies:nil)
+  def count_logins(user:, opts:)
     user.update_attribute('logins_count', user.logins_count + 1)
   end
 end
 
-class UserForLogin < ActiveRecord::Base
+class UserForCounter < ActiveRecord::Base
   has_secure_password
 end
 
-class ApplicationController < ActionController::Base
+class ApplicationController3 < ActionController::Base
   include JumpIn
   jumpin_use :session, :by_password, :login_counter
 end
 
-class LoginCounterController < ApplicationController
+class LoginCounterController < ApplicationController3
 end
 
 describe LoginCounterController, type: :controller do
@@ -28,7 +28,7 @@ describe LoginCounterController, type: :controller do
     ActiveRecord::Migration.verbose = false
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     ActiveRecord::Schema.define(:version => 1) do
-      create_table :user_for_logins do |t|
+      create_table :user_for_counters do |t|
         t.text :password_digest
         t.integer :logins_count, default: 0
       end
@@ -39,7 +39,7 @@ describe LoginCounterController, type: :controller do
     ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['test'])
   end
 
-  let(:user) { UserForLogin.new(password: 'secret') }
+  let(:user) { UserForCounter.new(password: 'secret') }
 
   context ".register_jumpin_callbacks" do
     it "adds on-login constant" do
@@ -54,7 +54,7 @@ describe LoginCounterController, type: :controller do
   context "#jump_in" do
     it 'calls LastLoggedIn strategy' do
       allow_to_receive_logged_in_and_return(false)
-      expect(subject).to receive(:count_logins).with(user: user, by_cookies: false)
+      expect(subject).to receive(:count_logins).with(user: user, opts: { by_cookies: false})
       subject.jump_in(user: user, password: user.password)
     end
   end

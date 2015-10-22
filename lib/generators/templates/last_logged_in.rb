@@ -10,7 +10,7 @@
 #       on_login: [:keep_last_login])
 #   end
 
-#   def keep_last_login(user:, by_cookies:nil)
+#   def keep_last_login(user:, opts:)
 #     user.update_attribute('last_login', Time.now)
 #   end
 # end

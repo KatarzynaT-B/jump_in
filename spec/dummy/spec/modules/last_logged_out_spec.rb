@@ -6,20 +6,20 @@ module JumpIn::LastLoggedOut
       on_logout: [:keep_last_logout])
   end
 
-  def keep_last_logout(user:, by_cookies:nil)
+  def keep_last_logout(user:)
     user.update_attribute('last_logout', Time.now)
   end
 end
 
-class UserForLogin < ActiveRecord::Base
+class UserForLogout < ActiveRecord::Base
 end
 
-class ApplicationController < ActionController::Base
+class ApplicationController2 < ActionController::Base
   include JumpIn
   jumpin_use :session, :by_password, :last_logged_out
 end
 
-class LastLoggedOutController < ApplicationController
+class LastLoggedOutController < ApplicationController2
 end
 
 describe LastLoggedOutController, type: :controller do
@@ -27,7 +27,7 @@ describe LastLoggedOutController, type: :controller do
     ActiveRecord::Migration.verbose = false
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     ActiveRecord::Schema.define(:version => 1) do
-      create_table :user_for_logins do |t|
+      create_table :user_for_logouts do |t|
         t.datetime :last_logout
       end
     end
@@ -37,7 +37,7 @@ describe LastLoggedOutController, type: :controller do
     ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations['test'])
   end
 
-  let(:user) { UserForLogin.new }
+  let(:user) { UserForLogout.new }
 
   context ".register_jumpin_callbacks" do
     it "adds on-logout constant" do
