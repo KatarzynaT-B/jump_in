@@ -55,7 +55,7 @@ Default `JumpIn` configuration is:
 
 You can modify it by running the generator:
 ```
-$ rails generate jump_in:install_generator
+$ rails generate jump_in:install
 ```
 which will create `config/initializers/jump_in.rb` for you. You can set custom values there.
 
